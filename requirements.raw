@@ -1,0 +1,10 @@
+## This file contains a list of all dependencies for the app without versions. Useful for upgrading.
+bcrypt # Password Hashing for Login
+Flask-REST-JSONAPI # JSONAPI in Flask
+future # Python3 Compatibility (import builtins)
+gunicorn # Server for deployed app
+marshmallow-sqlalchemy # Map DB Models to API Schemas
+psycopg2 # PostgreSQL library
+#PyMySQL # PDO for MySQL appropriate for Google Cloud SQL DB
+SQLAlchemy # ORM
+SQLAlchemy-Continuum # Audit log/versioning
