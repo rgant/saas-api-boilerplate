@@ -36,6 +36,13 @@ The `requirements.dev` file tracks and documents the development environment dep
 
 #### Install Requirements
 
+Install the same requirements as used on deploy:
+
+```
+pip install -r requirements.txt # deploy dependencies
+pip install -r requirements.dev # dev dependencies
+```
+
 For PostgreSQL:
 ```
 brew install postgresql
