@@ -28,18 +28,19 @@ class RainbowLogFormatter(logging.Formatter):
     }
 
     def format(self, record):
-        """ Adds the new colorlevelname to record and then calls the super. """
+        """ Adds the new colorlevelname to record and then returns the super. """
         record.colorlevelname = self.levelcolors[record.levelname]
         return super().format(record)
 
 
 class ContextFilter(logging.Filter):  # pylint: disable=too-few-public-methods
-    """ Add hostname and env-ironment attributes for logging. """
+    """ Make hostname, env-ironment, and app name available for logging. """
     hostname = socket.gethostname()
     env = os.environ.get('ENV', 'dev')
     app = 'backend'
 
     def filter(self, record):
+        """ Adds the hostname, environment and app name to record for papertrail logging. """
         record.hostname = self.hostname
         record.env = self.env
         record.app = self.app
@@ -54,7 +55,10 @@ class PapertrailHandler(logging.handlers.SysLogHandler):
 
 
 def init_logging(level=logging.INFO):
-    """ Setup Logging For py.test, running in debug mode. """
+    """
+    Setup Logging For py.test, running in debug mode. Output logging message to error stream.
+    :param int level: Logging level to display in Stream
+    """
     frmt = '%(colorlevelname)s:%(module)s:%(funcName)s:%(lineno)d:%(message)s'
     formatter = RainbowLogFormatter(frmt)
     handler = logging.StreamHandler()

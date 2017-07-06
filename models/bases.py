@@ -34,11 +34,12 @@ class Base(object):
 
     def __repr__(self):
         """
-        Returns python representation for creating this model. Data that isn't currently loaded
-        won't be fetched from DB, shows <not loaded> instead.
+        Custom representation for this Model. Data that isn't currently loaded won't be fetched
+        from DB, shows <not loaded> instead.
         Based on:
         https://github.com/kvesteri/sqlalchemy-utils/blob/0.32.14/sqlalchemy_utils/models.py#L41
         Customized to use our __str__ for fully qualified class name.
+        :return str: python representation for creating this model.
         """
         state = sa.inspect(self)
         field_reprs = []
@@ -54,7 +55,10 @@ class Base(object):
         return "{0}({1})".format(self, ', '.join(field_reprs))
 
     def __str__(self):
-        """ Returns the *fully qualified* name of this model. """
+        """
+        Custom informal string representation with complete model path
+        :return str: *fully qualified* name of this model.
+        """
         return self.__class__.__module__ + '.' + self.__class__.__name__
 
     @declared_attr
@@ -70,15 +74,17 @@ class Base(object):
 
 
 class BaseModel(Base):
-    """ Base for all Models. Should not be instantiated directly, but rather
-    subclassed for actual models. """
+    """
+    Base for all Models. Should not be instantiated directly, but rather subclassed for actual
+    models.
+    """
     __abstract__ = True
-    __versioned__ = {}
+    __versioned__ = {}  # Activate sqlalchemy_continuum versioning for all Resource Models
 
     id = sa.Column(sa.Integer, primary_key=True)  # pylint: disable=invalid-name
 
     def delete(self):
-        """ Delete this model in the session. """
+        """ Delete this model in the session. Does not flush the session. """
         logger = logging.getLogger(__name__)
         session = db.connect()  # Scoped Session for models.
         session.delete(self)
@@ -95,7 +101,7 @@ class BaseModel(Base):
         return session.query(cls).filter(cls.id == the_id).one_or_none()
 
     def save(self):
-        """ Add this model to the session. """
+        """ Add this model to the session. Does not flush the session. """
         logger = logging.getLogger(__name__)
         session = db.connect()  # Scoped Session for models.
         session.add(self)

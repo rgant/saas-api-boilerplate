@@ -86,7 +86,7 @@ def test_validate_email():
     # These might not be valid, but we aren't catching them right now.
     fail_addresses = ['.email@domain.com',  # Leading dot in address is not allowed
                       'email.@domain.com',  # Trailing dot in address is not allowed
-                      'email..email@domain.com',  # Multiple dots
+                      'email..email@domain.com',  # Multiple dots in username
                       'email@-domain.com']  # Leading dash in front of domain is invalid
     for addr in fail_addresses:
         assert utilities.is_valid_email_address(addr)

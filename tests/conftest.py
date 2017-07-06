@@ -32,8 +32,9 @@ def createdb():
 @pytest.fixture(scope='function')
 def dbsession(createdb):  # pylint: disable=redefined-outer-name
     """
-    Create a new session for a test.
+    Create a new session for a test, afterwards flush, rollback and then close the session.
     :param createdb: pytest fixture to create the test tables and delete them when test is done.
+    :yield: sqlalchemy session
     """
     session = createdb.connect()
 

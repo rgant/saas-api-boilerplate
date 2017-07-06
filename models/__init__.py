@@ -17,9 +17,9 @@ def __create_tables():
 
     Example Usage:
     $ ENV=stage python
-    >>> import sqmodels
+    >>> import models
     INFO:db:_init:36:Connected to STAGE database.
-    >>> sqmodels.__create_tables()
+    >>> models.__create_tables()
     """
     from . import db
     from . import bases

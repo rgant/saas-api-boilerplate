@@ -27,7 +27,10 @@ ENV = os.environ.get('ENV', 'dev')
 ENGINE = sqlalchemy.create_engine(CONNECTIONS[ENV])
 
 def _init():
-    """ Return a Scoped Session Factory. """
+    """
+    Initalize the FACTORY constant
+    :return sqlalchemy.orm.scoped_session: contextual/thread local session factory.
+    """
     factory = scoped_session(sessionmaker(bind=ENGINE))
     env_name = {'dev': '\033[0;32mDEV\033[0m',
                 'stage': '\033[1;33mSTAGE\033[0m',
@@ -40,7 +43,7 @@ def _init():
 FACTORY = _init()
 
 def close():
-    """ Cleanup the current session after commit. Else rollback. """
+    """ Dispose of the current session. """
     logger = logging.getLogger(__name__)
     logger.debug('Remove Scoped Session.')
     FACTORY.remove()
@@ -52,7 +55,10 @@ def commit():
     FACTORY.commit()  # pylint: disable=no-member
 
 def connect():
-    """ Creates a Scoped Session so all of our models can share the same sesison. """
+    """
+    New/current session for context/thread.
+    :retrun sqlalchemy.orm.session.Session: persistence operations for ORM-mapped objects
+    """
     session = FACTORY()
     logger = logging.getLogger(__name__)
     logger.debug('Return Scoped Session: %r.', session)
