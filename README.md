@@ -54,3 +54,8 @@ For MySQL:
 brew install mariadb
 mysql.server start
 ```
+
+## Directory Structure
+
+* common
+  * Module catchall for shared code (log and utilities)

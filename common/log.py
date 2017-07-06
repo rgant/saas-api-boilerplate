@@ -6,8 +6,7 @@ try:
     from builtins import *  # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
 except ImportError:
     import sys
-    print("WARNING: Cannot Load builtins for py3 compatibility.",
-          file=sys.stderr)
+    print("WARNING: Cannot Load builtins for py3 compatibility.", file=sys.stderr)
 
 import logging
 import logging.handlers
