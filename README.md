@@ -1,5 +1,5 @@
 # saas-api-boilerplate
-Boilerplate setup for SaaS JSONAPI in Python using Flask &amp; SQLAlchemy
+Boilerplate setup for SaaS [JSONAPI](http://jsonapi.org/format/) in Python using Flask &amp; SQLAlchemy
 
 ## Development Setup
 
@@ -33,3 +33,17 @@ The `requirements.raw` file tracks and documents the top level dependencies for 
 After `pip install -r requirements.raw` be sure to `pip freeze > requirements.txt` before installing the development dependencies in `requirements.dev`.
 
 The `requirements.dev` file tracks and documents the development environment dependencies for the project that should not be installed on deploy. (pylint, pytest, etc.)
+
+#### Install Requirements
+
+For PostgreSQL:
+```
+brew install postgresql
+pg_ctl -D /usr/local/var/postgres start # start postgresql
+```
+
+For MySQL:
+```
+brew install mariadb
+mysql.server start
+```
