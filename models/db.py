@@ -17,6 +17,7 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 
 CONNECTIONS = {
     'dev': 'postgresql://api@localhost/saas_dev',
+    # 'dev': 'mysql+pymysql://root@localhost/saas_dev?charset=utf8mb4',
     'stage': 'postgresql://api@localhost/saas_stage',
     'prod': 'postgresql://api@localhost/saas_prod'
 }

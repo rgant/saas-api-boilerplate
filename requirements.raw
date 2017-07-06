@@ -5,6 +5,6 @@ future # Python3 Compatibility (import builtins)
 gunicorn # Server for deployed app
 marshmallow-sqlalchemy # Map DB Models to API Schemas
 psycopg2 # PostgreSQL library
-#PyMySQL # PDO for MySQL appropriate for Google Cloud SQL DB
+PyMySQL # PDO for MySQL appropriate for Google Cloud SQL DB
 SQLAlchemy # ORM
 SQLAlchemy-Continuum # Audit log/versioning

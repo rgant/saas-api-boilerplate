@@ -24,10 +24,11 @@ NO_VALUE = sa_symbol('NO_VALUE')
 @as_declarative()  # pylint: disable=too-few-public-methods
 class Base(object):
     """ Declarative base for ORM. """
-    created_at = sa.Column(sa.DateTime(timezone=True), default=sa_func.now(), nullable=False,
-                           server_default=sa_func.now())
-    updated_at = sa.Column(sa.DateTime(timezone=True), default=None, onupdate=sa_func.now())
-                           # server_default=sa.text('NULL ON UPDATE CURRENT_TIMESTAMP'))  # MySQL
+    # Don't set timezone=True on DateTime column, the DB should be running as UTC as is the API.
+    # This way we don't have to deal with aware datetime objects
+    modified_at = sa.Column(sa.DateTime, default=sa_func.now(), nullable=False,
+                            onupdate=sa_func.now())
+                            # server_default=sa.text('NULL ON UPDATE CURRENT_TIMESTAMP'))  # MySQL
 
     _cached_tablename = None
 

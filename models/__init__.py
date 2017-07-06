@@ -22,12 +22,12 @@ def __create_tables():
     >>> sqmodels.__create_tables()
     """
     from . import db
-    from . import base
+    from . import bases
     make_versioned(user_cls=None)
-    base.Base.metadata.create_all(db.ENGINE)  # pylint: disable=no-member
+    bases.Base.metadata.create_all(db.ENGINE)  # pylint: disable=no-member
 
 def __drop_tables():
     """ Drop the tables for our models. For testing only. """
     from . import db
-    from . import base
-    base.Base.metadata.drop_all(db.ENGINE)  # pylint: disable=no-member
+    from . import bases
+    bases.Base.metadata.drop_all(db.ENGINE)  # pylint: disable=no-member

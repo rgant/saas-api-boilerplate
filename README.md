@@ -46,6 +46,7 @@ pip install -r requirements.dev # dev dependencies
 For PostgreSQL:
 ```
 brew install postgresql
+sed -i '' -e "s/timezone = 'US\/Eastern'/timezone = 'UTC'/" /usr/local//var/postgres/postgresql.conf
 pg_ctl -D /usr/local/var/postgres start # start postgresql
 createuser api --createdb
 createdb $PROJECT_dev -U api
@@ -54,7 +55,9 @@ createdb $PROJECT_dev -U api
 For MySQL:
 ```
 brew install mariadb
+echo -e "[mysqld]\ndefault-time-zone='+00:00'" > /usr/local/etc/my.cnf.d/default-time-zone.cnf
 mysql.server start
+mysql -u root -e 'CREATE DATABASE `'$PROJECT'_dev` /*!40100 DEFAULT CHARACTER SET utf8 */'
 ```
 
 ## Directory Structure

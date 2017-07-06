@@ -8,22 +8,23 @@ except ImportError:
     import sys
     print("WARNING: Cannot Load builtins for py3 compatibility.", file=sys.stderr)
 
+import datetime
 import warnings
 
 import sqlalchemy as sa
 
-from models import base
+from models import bases
 
 
 warnings.simplefilter("error")  # Make All warnings errors while testing.
 
 
-class DummyBase(base.Base):  # pylint: disable=too-few-public-methods
+class DummyBase(bases.Base):  # pylint: disable=too-few-public-methods
     """ Model for testing the declarative base. """
     pkey = sa.Column(sa.Integer, primary_key=True)  # SQLAlchemy requires a primary key
 
 
-class DummyModel(base.BaseModel):
+class DummyModel(bases.BaseModel):
     """ Model for testing the BaseModel. """
     email = sa.Column(sa.String(50), unique=True, nullable=False)
 
@@ -37,44 +38,60 @@ def test_base_tablename():
     """ Convert Class Name to snake case for table name. """
     dbase = DummyBase()
     assert dbase.__tablename__ == 'dummy_base'
-    model = DummyModel()
-    assert model.__tablename__ == 'dummy_model'
+    dmodel = DummyModel()
+    assert dmodel.__tablename__ == 'dummy_model'
 
 def test_base_repr():
     """ Representation of Base and BaseModel should represent python to generate model. """
     dbase = DummyBase()
-    assert repr(dbase) == ('tests.models.test_base.DummyBase(created_at=<not loaded>, '
-                           'updated_at=<not loaded>, pkey=<not loaded>)')
-    model = DummyModel()
-    assert repr(model) == ('tests.models.test_base.DummyModel(created_at=<not loaded>, '
-                           'updated_at=<not loaded>, id=<not loaded>, email=<not loaded>)')
+    assert repr(dbase) == ('tests.models.test_base.DummyBase(modified_at=<not loaded>, '
+                           'pkey=<not loaded>)')
+    dmodel = DummyModel()
+    assert repr(dmodel) == ('tests.models.test_base.DummyModel(modified_at=<not loaded>, '
+                            'id=<not loaded>, email=<not loaded>)')
 
 def test_basemodel_save(dbsession):  # pylint: disable=unused-argument
-    """ BaseModels are Session Aware and save themselves. """
-    model = DummyModel(email='7cf0@496d.aa5e')
-    model.save()
-    assert model.id is None
+    """ BaseModels are Session Aware and save themselves. They do not flush however. """
+    dmodel = DummyModel(email='7cf0@496d.aa5e')
+    dmodel.save()
+    assert dmodel.id is None
+    assert dmodel.modified_at is None
+    assert dmodel.email == '7cf0@496d.aa5e'
 
 def test_basemodel_get_pk(dbsession):
     """ BaseModels have a get_by_pk method. """
     # First create a record to fetch.
-    model = DummyModel(email='9f1c@4dd6.b647')
-    model.save()
+    dmodel = DummyModel(email='9f1c@4dd6.b647')
+    dmodel.save()
     dbsession.commit()
-    assert model.id is not None
-    the_id = model.id
+    assert dmodel.id is not None
+    the_id = dmodel.id
 
-    model2 = DummyModel.get_by_pk(the_id)
-    assert model2 == model
+    dmodel2 = DummyModel.get_by_pk(the_id)
+    assert dmodel2 == dmodel
 
 def test_basemodel_delete(dbsession):
     """ BaseModels are Session Aware and delete temselves. """
     # First create a record to delete.
-    model = DummyModel(email='90e1@47e7.aff7')
-    model.save()
+    dmodel = DummyModel(email='90e1@47e7.aff7')
+    dmodel.save()
     dbsession.commit()
-    assert model.id is not None
-    the_id = model.id
+    assert dmodel.id is not None
+    the_id = dmodel.id
 
-    model.delete()
+    dmodel.delete()
     assert DummyModel.get_by_pk(the_id) is None
+
+def test_basemodel_modified_at(dbsession):
+    """ On commit (or flush) models should have modified_at timestamp set. """
+    dmodel = DummyModel(email='63ab@4852.8da7')
+    dmodel.save()
+    dbsession.commit()
+    # MySQL doesnt' support microseconds in datetime columns, but PostgreSQL does. Either way
+    # comparing them won't work so remove.
+    now = datetime.datetime.utcnow().replace(microsecond=0)
+    assert dmodel.id is not None
+    assert dmodel.email == '63ab@4852.8da7'
+    # PostgreSQL includes microseconds, comparing them won't work so remove
+    mod_at = dmodel.modified_at.replace(microsecond=0)
+    assert mod_at == now
