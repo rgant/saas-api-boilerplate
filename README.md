@@ -47,6 +47,8 @@ For PostgreSQL:
 ```
 brew install postgresql
 pg_ctl -D /usr/local/var/postgres start # start postgresql
+createuser api --createdb
+createdb $PROJECT_dev -U api
 ```
 
 For MySQL:
@@ -59,3 +61,5 @@ mysql.server start
 
 * common
   * Module catchall for shared code (log and utilities)
+* models
+  * Resource models, don't use flask-sqlalchemy so the models can be used by scripts outside of flask context.

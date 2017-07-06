@@ -19,3 +19,7 @@ _set_prompt()
 del sys
 del os
 del _set_prompt
+
+# Do this last so that logging is setup first.
+import models  # pylint: disable=unused-import,wrong-import-position
+print('import models')

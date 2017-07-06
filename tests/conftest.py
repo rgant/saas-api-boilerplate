@@ -4,8 +4,10 @@ https://gist.github.com/alexmic/7857543
 """
 import warnings
 
-from common import log
+import pytest
 
+from common import log
+import models
 
 warnings.simplefilter("error")  # Make All warnings errors while testing.
 
@@ -13,3 +15,32 @@ warnings.simplefilter("error")  # Make All warnings errors while testing.
 # If something else sets up logging first then this won't trigger.
 # For example: db.py calling logging.info() or such.
 log.init_logging()
+
+@pytest.fixture(scope='session')
+def createdb():
+    """
+    Session-wide test database.
+    :yield: models.db
+    """
+    models.__create_tables()  # pylint: disable=protected-access
+
+    yield models.db
+
+    models.__drop_tables()  # pylint: disable=protected-access
+
+
+@pytest.fixture(scope='function')
+def dbsession(createdb):  # pylint: disable=redefined-outer-name
+    """
+    Create a new session for a test.
+    :param createdb: pytest fixture to create the test tables and delete them when test is done.
+    """
+    session = createdb.connect()
+
+    yield session
+
+    # This way we can get any database intergrety errors created in testing.
+    session.flush()
+
+    createdb.rollback()
+    createdb.close()
