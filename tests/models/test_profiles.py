@@ -12,7 +12,7 @@ import warnings
 
 import pytest
 
-from models import profiles
+from models import logins, profiles
 
 
 warnings.simplefilter("error")  # Make All warnings errors while testing.
@@ -73,3 +73,12 @@ def test_get_by_email(dbsession):  # pylint: disable=unused-argument
 
     # Now it can be found.
     assert profiles.Profiles.get_by_email('2c32@4fc0.beec') == profile
+
+def test_login_relation(dbsession):  # pylint: disable=unused-argument
+    """ Profiles can have a Logins relation. """
+    profile = profiles.Profiles(full_name='4176898b 61d515c6e423', email='61b4@4a1d.9f2b')
+    login = logins.Logins(password='104d4cec-9425-4e37-9de2-242c6d772eea')
+
+    assert profile.login is None
+    profile.login = login
+    assert profile.login == login

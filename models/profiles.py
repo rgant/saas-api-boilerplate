@@ -21,6 +21,8 @@ class Profiles(bases.BaseModel):
     email = sa.Column(sa.String(50), unique=True, nullable=False)
     full_name = sa.Column(sa.String(100), nullable=False)
 
+    login = saorm.relationship('Logins', uselist=False, back_populates='profile')
+
     @classmethod
     def get_by_email(cls, email):
         """
