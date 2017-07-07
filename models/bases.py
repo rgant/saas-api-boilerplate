@@ -94,7 +94,7 @@ class BaseModel(Base):
     def get_by_pk(cls, the_id):
         """
         Lookup record in the table by Primary Key.
-        :param int the_id: Primary Key (id) to Lookup
+        :param int the_id: Primary Key (id) to lookup
         :return BaseModel: Subclass of BaseModel or None
         """
         session = db.connect()  # Scoped Session for models.

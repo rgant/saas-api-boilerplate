@@ -13,12 +13,24 @@ import sqlalchemy.orm as saorm
 
 from common import utilities
 from . import bases
+from . import db
 
 
 class Profiles(bases.BaseModel):
     """ Contains the profile information for a user in the app. """
     email = sa.Column(sa.String(50), unique=True, nullable=False)
     full_name = sa.Column(sa.String(100), nullable=False)
+
+    @classmethod
+    def get_by_email(cls, email):
+        """
+        Lookup Profile by email address.
+        :param str email: email address to lookup
+        :return Profiles: Matching Profile or None
+        """
+        session = db.connect()  # Scoped Session for models.
+        print(cls.email, email)
+        return session.query(cls).filter(cls.email == email).one_or_none()
 
     @saorm.validates('email')
     def validate_email(self, key, address):  # pylint: disable=unused-argument,no-self-use
