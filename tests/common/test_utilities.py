@@ -49,6 +49,13 @@ def test_camel_to_snake_case():
     for camel, snake in test_strings.items():
         assert utilities.camel_to_snake_case(camel) == snake
 
+def test_is_common_password():
+    """ Detect common passwords. """
+    assert utilities.is_common_password('password')
+    assert utilities.is_common_password('Password')
+    assert utilities.is_common_password('PASSWORD')
+    assert not utilities.is_common_password('foobar')
+
 def test_validate_email():
     """ Tests email validation function vs list of good and bad emails addresses. """
     # http://blogs.msdn.com/b/testing123/archive/2009/02/05/email-address-test-cases.aspx

@@ -10,6 +10,8 @@ except ImportError:
 
 import re
 
+from . import common_passwords
+
 
 def camel_to_snake_case(name):
     """
@@ -32,3 +34,11 @@ def is_valid_email_address(address):
     # From http://stackoverflow.com/questions/8022530/python-check-for-valid-email-address
     valid_email_address_pattern = re.compile(r'^[^@ ]+@[^@. ]+(?:\.[^@. ]+)+$')
     return bool(valid_email_address_pattern.match(address))
+
+def is_common_password(passwd):
+    """
+    Check passwd against a list of common passwords.
+    :param str passwd: Password to test
+    :return bool: Password is common
+    """
+    return passwd.lower() in common_passwords.COMMON_PASSWORDS
