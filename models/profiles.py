@@ -22,6 +22,7 @@ class Profiles(bases.BaseModel):
     full_name = sa.Column(sa.String(100), nullable=False)
 
     login = saorm.relationship('Logins', uselist=False, back_populates='profile')
+    memberships = saorm.relationship('Memberships', back_populates='profile')
 
     @classmethod
     def get_by_email(cls, email):

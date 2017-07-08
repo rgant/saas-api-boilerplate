@@ -13,7 +13,7 @@ import warnings
 import pytest
 from sqlalchemy.exc import IntegrityError
 
-from models import logins, profiles
+from models import groups, logins, memberships, profiles
 
 
 warnings.simplefilter("error")  # Make All warnings errors while testing.
@@ -87,7 +87,7 @@ def test_required_fields_blank(dbsession):
     with pytest.raises(IntegrityError):
         dbsession.commit()
 
-def test_required_password(dbsession):
+def test_required_full_name(dbsession):
     """
     Profiles must have a full_name and an email address.
     :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
@@ -159,3 +159,18 @@ def test_login_relation(dbsession):  # pylint: disable=unused-argument
     assert profile.login is None
     profile.login = login
     assert profile.login == login
+
+def test_memberships_relation(dbsession):
+    """ Profiles can have Memberships relations. """
+    group1 = groups.Groups(name='dfe5cf8f-1da7-4b70-aefb-8236cd894c5d')
+    membership1 = memberships.Memberships(group=group1)
+    group2 = groups.Groups(name='3b821a0d-5313-4534-8f18-573845915e21')
+    membership2 = memberships.Memberships(group=group2)
+    profile = profiles.Profiles(full_name='61f7d724 7cab51d68b61', email='d90c@4e2f.85f4')
+    profile.memberships += (membership1, membership2)
+
+    profile.save()
+    dbsession.commit()
+    assert len(profile.memberships) == 2
+    assert membership1 in profile.memberships
+    assert membership2 in profile.memberships
