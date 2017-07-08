@@ -74,6 +74,8 @@ def test_password_short():
     with pytest.raises(ValueError):
         inst.password = 'abcde1234'
 
+    inst.password = '19c353d4-4'
+
 def test_password_email():
     """ Passwords aren't allowed to match email. """
     with pytest.raises(ValueError):
@@ -86,6 +88,15 @@ def test_password_email():
     inst2 = logins.Logins(password='48c5@4664.82aa')
     with pytest.raises(ValueError):
         inst2.email = '48c5@4664.82aa'
+
+def test_password_common():
+    """ Common passwords aren't allowed. """
+    with pytest.raises(ValueError):
+        logins.Logins(password='1234567890')
+
+    inst = logins.Logins()
+    with pytest.raises(ValueError):
+        inst.password = '1234567890'
 
 def test_password_validation():
     """ Getting and setting password. """
