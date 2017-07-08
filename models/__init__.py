@@ -10,6 +10,7 @@ except ImportError:
 
 from sqlalchemy_continuum import make_versioned
 
+from . import forgot_password_tokens, logins, profiles
 
 def __create_tables():
     """
