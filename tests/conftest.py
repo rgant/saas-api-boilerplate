@@ -20,7 +20,7 @@ log.init_logging()
 def createdb():
     """
     Session-wide test database.
-    :yield: models.db
+    :yield models.db: database module for models
     """
     models.__create_tables()  # pylint: disable=protected-access
 
@@ -34,7 +34,7 @@ def dbsession(createdb):  # pylint: disable=redefined-outer-name
     """
     Create a new session for a test, afterwards flush, rollback and then close the session.
     :param createdb: pytest fixture to create the test tables and delete them when test is done.
-    :yield: sqlalchemy session
+    :yield sqlalchemy.orm.session.Session: sqlalchemy session for test
     """
     session = createdb.connect()
 

@@ -24,8 +24,10 @@ class Logins(bases.BaseModel):
     Contains the login information for a Profile in the app. Not every Profile may have an
     associated login. This is not a JSONAPI exposed Model.
     """
-    email = sa.Column(sa.String(50), sa.ForeignKey('profiles.email', ondelete='CASCADE'),
-                      nullable=False)
+    # Not that we should ever delete records, but if the Profile is deleted, delete the Login
+    # Also if the email is changed in the Profile, update the Logins.
+    email = sa.Column(sa.String(50), sa.ForeignKey('profiles.email', ondelete='CASCADE',
+                                                   onupdate='CASCADE'), nullable=False)
     enabled = sa.Column(sa.Boolean, default=True, server_default=sa.text('true'), nullable=False)
     # The hash is really a binary and PostgreSQL cares about that, so use LargeBinary type which
     # results in bytea in PostgreSQL and tinyblob in MySQL. (BTW in python the hash looks like 60
@@ -42,7 +44,6 @@ class Logins(bases.BaseModel):
         :return Logins: Matching Login or None
         """
         session = db.connect()  # Scoped Session for models.
-        print(cls.email, email)
         return session.query(cls).filter(cls.email == email).one_or_none()
 
     def is_valid_password(self, password):

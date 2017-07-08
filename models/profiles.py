@@ -31,7 +31,6 @@ class Profiles(bases.BaseModel):
         :return Profiles: Matching Profile or None
         """
         session = db.connect()  # Scoped Session for models.
-        print(cls.email, email)
         return session.query(cls).filter(cls.email == email).one_or_none()
 
     @saorm.validates('email')

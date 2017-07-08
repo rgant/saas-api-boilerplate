@@ -11,6 +11,7 @@ except ImportError:
 import datetime
 import warnings
 
+import pytest
 import sqlalchemy as sa
 
 from models import bases
@@ -28,6 +29,25 @@ class DummyModel(bases.BaseModel):
     """ Model for testing the BaseModel. """
     email = sa.Column(sa.String(50), unique=True, nullable=False)
 
+@pytest.fixture(scope='module')
+def testdata(createdb):
+    """
+    Create the necessary test data for this module.
+    :param models.db createdb: pytest fixture for database module
+    :return list(int): List of ids for DummyModel created.
+    """
+    dbsession = createdb.connect()
+    ids = []
+    emails = ('9f1c@4dd6.b647', '90e1@47e7.aff7')
+    for email in emails:
+        dmodel = DummyModel(email=email)
+        dbsession.add(dmodel)
+        dbsession.flush()
+        ids.append(dmodel.id)
+
+    dbsession.commit()
+    createdb.close()
+    return ids
 
 def test_base_str():
     """ String representation of the Base and BaseModel. """
@@ -51,39 +71,69 @@ def test_base_repr():
                             'id=<not loaded>, email=<not loaded>)')
 
 def test_basemodel_save(dbsession):  # pylint: disable=unused-argument
-    """ BaseModels are Session Aware and save themselves. They do not flush however. """
+    """
+    BaseModels are Session Aware and save themselves. They do not flush however.
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    """
     dmodel = DummyModel(email='7cf0@496d.aa5e')
     dmodel.save()
     assert dmodel.id is None
     assert dmodel.modified_at is None
     assert dmodel.email == '7cf0@496d.aa5e'
 
-def test_basemodel_get_pk(dbsession):
-    """ BaseModels have a get_by_pk method. """
-    # First create a record to fetch.
-    dmodel = DummyModel(email='9f1c@4dd6.b647')
-    dmodel.save()
-    dbsession.commit()
-    assert dmodel.id is not None
-    the_id = dmodel.id
+def test_basemodel_get_pk_blank(dbsession, testdata):  # pylint: disable=unused-argument,redefined-outer-name
+    """
+    Empty IDs should return None
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    :param list(int) testdata: pytest fixture listing DummyModel test data ids.
+    """
+    assert 0 not in testdata
+    dmodel = DummyModel.get_by_pk(0)
+    assert dmodel is None
 
-    dmodel2 = DummyModel.get_by_pk(the_id)
-    assert dmodel2 == dmodel
+def test_basemodel_get_pk_none(dbsession, testdata):  # pylint: disable=unused-argument,redefined-outer-name
+    """
+    None IDs should return None
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    :param list(int) testdata: pytest fixture listing DummyModel test data ids.
+    """
+    dmodel = DummyModel.get_by_pk(None)
+    assert dmodel is None
 
-def test_basemodel_delete(dbsession):
-    """ BaseModels are Session Aware and delete temselves. """
-    # First create a record to delete.
-    dmodel = DummyModel(email='90e1@47e7.aff7')
-    dmodel.save()
-    dbsession.commit()
-    assert dmodel.id is not None
-    the_id = dmodel.id
+def test_basemodel_get_pk_missing(dbsession, testdata):  # pylint: disable=unused-argument,redefined-outer-name
+    """
+    None IDs should return None
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    :param list(int) testdata: pytest fixture listing DummyModel test data ids.
+    """
+    assert 123 not in testdata
+    dmodel = DummyModel.get_by_pk(123)
+    assert dmodel is None
 
+def test_basemodel_get_pk(dbsession, testdata):  # pylint: disable=unused-argument,redefined-outer-name
+    """
+    BaseModels have a get_by_pk method.
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    :param list(int) testdata: pytest fixture listing DummyModel test data ids.
+    """
+    dmodel = DummyModel.get_by_pk(testdata[0])
+    assert dmodel.id == testdata[0]
+
+def test_basemodel_delete(dbsession, testdata):  # pylint: disable=unused-argument,redefined-outer-name
+    """
+    BaseModels are Session Aware and delete temselves.
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    :param list(int) testdata: pytest fixture listing DummyModel test data ids.
+    """
+    dmodel = DummyModel.get_by_pk(testdata[1])
     dmodel.delete()
-    assert DummyModel.get_by_pk(the_id) is None
+    assert DummyModel.get_by_pk(testdata[1]) is None
 
 def test_basemodel_modified_at(dbsession):
-    """ On commit (or flush) models should have modified_at timestamp set. """
+    """
+    On commit (or flush) models should have modified_at timestamp set.
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    """
     dmodel = DummyModel(email='63ab@4852.8da7')
     dmodel.save()
     dbsession.commit()

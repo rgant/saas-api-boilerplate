@@ -17,6 +17,26 @@ from models import logins, profiles
 
 warnings.simplefilter("error")  # Make All warnings errors while testing.
 
+@pytest.fixture(scope='module')
+def testdata(createdb):
+    """
+    Create the necessary test data for this module.
+    :param models.db createdb: pytest fixture for database module
+    :return list(str): List of emails for Profiles created.
+    """
+    dbsession = createdb.connect()
+    emails = []
+    data = ({'full_name': '4961e0b7 9acfd7e74533', 'email': '439b@47e7.ae97'},
+            {'full_name': '315ab3db 535af6a5b009', 'email': '8d3d@4719.8278'})
+    for record in data:
+        profile = profiles.Profiles(full_name=record['full_name'], email=record['email'])
+        dbsession.add(profile)
+        emails.append(profile.email)
+
+    dbsession.commit()
+    createdb.close()
+    return emails
+
 def test_email_validation_none():
     """ None is not a valid email value """
     with pytest.raises(TypeError):
@@ -54,12 +74,22 @@ def test_email_validation():
     inst2.email = 'f0ad@4f94.ab7d'
     assert inst2.email == 'f0ad@4f94.ab7d'
 
-def test_get_by_email_blank(dbsession):  # pylint: disable=unused-argument
-    """ Blanks shouldn't be found """
+def test_get_by_email_blank(dbsession, testdata):  # pylint: disable=unused-argument,redefined-outer-name
+    """
+    Blanks shouldn't be found
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    :param list(str) testdata: pytest fixture listing test data tokens.
+    """
+    # Include testdata so we know there are at least some records in table to search
     assert profiles.Profiles.get_by_email('') is None
 
-def test_get_by_email_unknonw(dbsession):  # pylint: disable=unused-argument
-    """ Non-existing profiles shouldn't be found """
+def test_get_by_email_unknonw(dbsession, testdata):  # pylint: disable=unused-argument,redefined-outer-name
+    """
+    Non-existing profiles shouldn't be found
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    :param list(str) testdata: pytest fixture listing test data tokens.
+    """
+    assert '1ced@4c41.a936' not in testdata
     assert profiles.Profiles.get_by_email('1ced@4c41.a936') is None
 
 def test_get_by_email(dbsession):  # pylint: disable=unused-argument

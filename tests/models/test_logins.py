@@ -18,6 +18,29 @@ from models import logins, profiles
 
 warnings.simplefilter("error")  # Make All warnings errors while testing.
 
+@pytest.fixture(scope='module')
+def testdata(createdb):
+    """
+    Create the necessary test data for this module.
+    :param models.db createdb: pytest fixture for database module
+    :return list(str): List of emails for Logins created.
+    """
+    dbsession = createdb.connect()
+    emails = []
+    data = ({'full_name': 'f4d94fd2 c10282e403d0', 'email': 'fca7@485d.b169',
+             'password': '0c37f17b-4f89-4dce-a453-887b5acb9848'},
+            {'full_name': 'e3391b5 586ecf591968', 'email': 'ca14@4891.92d7',
+             'password': '7a1bb392-cc9c-4cde-8c9d-9ae2dc638bbf'})
+    for record in data:
+        profile = profiles.Profiles(full_name=record['full_name'], email=record['email'])
+        login = logins.Logins(password=record['password'], profile=profile)
+        dbsession.add(login)
+        emails.append(profile.email)
+
+    dbsession.commit()
+    createdb.close()
+    return emails
+
 def test_password_setter():
     """ Getting and setting password. """
     inst1 = logins.Logins()
@@ -43,7 +66,10 @@ def test_password_validation():
     assert inst.is_valid_password(passwd) is True
 
 def test_person_relation(dbsession):  # pylint: disable=unused-argument
-    """ Profiles can have a Logins relation. """
+    """
+    Profiles can have a Logins relation.
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    """
     profile = profiles.Profiles(full_name='a142cb03 6b369b6bfd1e', email='7aa3@49fa.809b')
     login = logins.Logins(password='84600a2f-0dd1-402a-8e19-5a3c3f27e972')
 
@@ -52,7 +78,10 @@ def test_person_relation(dbsession):  # pylint: disable=unused-argument
     assert login.profile == profile
 
 def test_required_fields_blank(dbsession):
-    """ Logins must have a password and an email address. """
+    """
+    Logins must have a password and an email address.
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    """
     login = logins.Logins()
     login.save()
 
@@ -61,7 +90,10 @@ def test_required_fields_blank(dbsession):
         dbsession.commit()
 
 def test_required_password(dbsession):
-    """ Logins must have a password and an email address. """
+    """
+    Logins must have a password and an email address.
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    """
     login = logins.Logins(email='7056@4de1.8dd4')
     login.save()
 
@@ -70,7 +102,10 @@ def test_required_password(dbsession):
         dbsession.commit()
 
 def test_required_email(dbsession):
-    """ Logins must have a password and an email address. """
+    """
+    Logins must have a password and an email address.
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    """
     login = logins.Logins(password='eba7f929-5869-41a7-a459-450ba25d7777')
     login.save()
 
@@ -79,7 +114,10 @@ def test_required_email(dbsession):
         dbsession.commit()
 
 def test_required_fields(dbsession):
-    """ Logins must have a password and an email address. """
+    """
+    Logins must have a password and an email address.
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    """
     login = logins.Logins(password='b37f50b0-ef76-4c1b-957c-210a54fc94cd', email='f2c7@4109.9360')
     login.save()
 
@@ -87,16 +125,29 @@ def test_required_fields(dbsession):
     with pytest.raises(IntegrityError):
         dbsession.commit()
 
-def test_get_by_email_blank(dbsession):  # pylint: disable=unused-argument
-    """ Blanks shouldn't be found """
+def test_get_by_email_blank(dbsession, testdata):  # pylint: disable=unused-argument,redefined-outer-name
+    """
+    Blanks shouldn't be found
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    :param list(str) testdata: pytest fixture listing test data tokens.
+    """
+    # Include testdata so we know there are at least some records in table to search
     assert logins.Logins.get_by_email('') is None
 
-def test_get_by_email_unknonw(dbsession):  # pylint: disable=unused-argument
-    """ Non-existing logins shouldn't be found """
+def test_get_by_email_unknown(dbsession, testdata):  # pylint: disable=unused-argument,redefined-outer-name
+    """
+    Non-existing logins shouldn't be found
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    :param list(str) testdata: pytest fixture listing test data tokens.
+    """
+    assert '184b@4e19.b8f3' not in testdata
     assert logins.Logins.get_by_email('184b@4e19.b8f3') is None
 
 def test_get_by_email(dbsession):  # pylint: disable=unused-argument
-    """ Create Logins, and then fetch them by email address. """
+    """
+    Create Logins, and then fetch them by email address.
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    """
     login = logins.Logins(password='01a1cd60-8608-4bbf-a0da-0922bc6762be')
     login.profile = profiles.Profiles(full_name='fb000987 2e2cb7f95b6a', email='9a12@49e4.88b7')
 
@@ -108,8 +159,24 @@ def test_get_by_email(dbsession):  # pylint: disable=unused-argument
     # Now it can be found.
     assert logins.Logins.get_by_email('9a12@49e4.88b7') is login
 
+def test_required_profile_missing(dbsession):
+    """
+    Login profile not existing is an error.
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    """
+    login = logins.Logins(password='7cc64abd-86bd-4856-8577-5f1123f28cac', email='372d@417c.b9db')
+    profile = profiles.Profiles(full_name='5f904cb5 3dad7d54b87b', email='372d@417c.b9db')
+    login.save()  # Profile isn't saved because we didn't use the relationship attribute.
+    assert login.email == profile.email
+
+    with pytest.raises(IntegrityError):
+        dbsession.commit()
+
 def test_required_profile(dbsession):
-    """ Logins must have a password and an email address. """
+    """
+    Logins profile must exist.
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    """
     login = logins.Logins(password='6d332e7d-0c83-43c3-9fab-ad24c793fd5e')
     profile = profiles.Profiles(full_name='9ca81d5c 42badee25c18', email='3aea@4cbb.a004')
     login.profile = profile
