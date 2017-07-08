@@ -56,6 +56,37 @@ def test_password_setter():
     assert inst2._password is not None  # pylint: disable=protected-access
     assert inst2.password != passwd2
 
+def test_password_blank():
+    """ Blank passwords aren't allowed. """
+    with pytest.raises(ValueError):
+        logins.Logins(password='')
+
+    inst = logins.Logins()
+    with pytest.raises(ValueError):
+        inst.password = ''
+
+def test_password_short():
+    """ Short passwords aren't allowed. """
+    with pytest.raises(ValueError):
+        logins.Logins(password='abcd12345')
+
+    inst = logins.Logins()
+    with pytest.raises(ValueError):
+        inst.password = 'abcde1234'
+
+def test_password_email():
+    """ Passwords aren't allowed to match email. """
+    with pytest.raises(ValueError):
+        logins.Logins(password='a703@4285.b5c8', email='a703@4285.b5c8')
+
+    inst1 = logins.Logins(email='e100@441b.b5d7')
+    with pytest.raises(ValueError):
+        inst1.password = 'e100@441b.b5d7'
+
+    inst2 = logins.Logins(password='48c5@4664.82aa')
+    with pytest.raises(ValueError):
+        inst2.email = '48c5@4664.82aa'
+
 def test_password_validation():
     """ Getting and setting password. """
     passwd = '99e7988b-578c-4edb-8a28-4831cd47617a'

@@ -15,6 +15,7 @@ import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import hybrid_property
 import sqlalchemy.orm as saorm
 
+from common import utilities
 from . import bases
 from . import db
 
@@ -69,10 +70,29 @@ class Logins(bases.BaseModel):
     def password(self, value):
         """
         Ensure that passwords are always stored hashed and salted.
+        Requirements: https://blog.codinghorror.com/password-rules-are-bullshit/
         :param str value: New password for login
         """
+        if len(value) < 10:
+            raise ValueError('Minimum password length is 10 characters.')
+        if self.email and value.lower() == self.email.lower():
+            raise ValueError('Using email as password forbidden')
+        if utilities.is_common_password(value):
+            raise ValueError('Commong passwords are forbidden')
+
         # When a login is first created, give them a salt
         self._password = bcrypt.hashpw(value.encode('utf8'), bcrypt.gensalt())
 
-    # @saorm.validates('email')
-    # No need to validate email here as it is a foreign key to the validated email in Profiles
+    @saorm.validates('email')
+    def validate_email(self, key, address):  # pylint: disable=unused-argument,no-self-use
+        """
+        No need to validate email here as it is a foreign key to the validated email in Profiles.
+        But we do want to make sure that the password and email don't match.
+        :param str key: name of the field to validate.
+        :param str address: email address
+        :return str: the email address
+        :raises ValueError: Invalid email
+        """
+        if self._password and self.is_valid_password(address):
+            raise ValueError('Using email as password forbidden')
+        return address
