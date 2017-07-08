@@ -11,6 +11,7 @@ except ImportError:
 import warnings
 
 import pytest
+from sqlalchemy.exc import IntegrityError
 
 from models import logins, profiles
 
@@ -73,6 +74,52 @@ def test_email_validation():
     inst2 = profiles.Profiles()
     inst2.email = 'f0ad@4f94.ab7d'
     assert inst2.email == 'f0ad@4f94.ab7d'
+
+def test_required_fields_blank(dbsession):
+    """
+    Profiles must have a full_name and an email address.
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    """
+    profile = profiles.Profiles()
+    profile.save()
+
+    # full_name and email are blank
+    with pytest.raises(IntegrityError):
+        dbsession.commit()
+
+def test_required_password(dbsession):
+    """
+    Profiles must have a full_name and an email address.
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    """
+    profile = profiles.Profiles(email='7056@4de1.8dd4')
+    profile.save()
+
+    # full_name is blank
+    with pytest.raises(IntegrityError):
+        dbsession.commit()
+
+def test_required_email(dbsession):
+    """
+    Profiles must have a full_name and an email address.
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    """
+    profile = profiles.Profiles(full_name='a79b8cae 76fdda035a30')
+    profile.save()
+
+    # email is blank
+    with pytest.raises(IntegrityError):
+        dbsession.commit()
+
+def test_required_fields(dbsession):
+    """
+    Profiles must have a full_name and an email address.
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    """
+    profile = profiles.Profiles(full_name='07694435 6b04b7cda98c', email='b9ea@4182.a914')
+    profile.save()
+
+    dbsession.commit()
 
 def test_get_by_email_blank(dbsession, testdata):  # pylint: disable=unused-argument,redefined-outer-name
     """
