@@ -47,7 +47,7 @@ For PostgreSQL:
 ```
 brew install postgresql
 sed -i '' -e "s/timezone = 'US\/Eastern'/timezone = 'UTC'/" /usr/local//var/postgres/postgresql.conf
-pg_ctl -D /usr/local/var/postgres start # start postgresql
+pg_ctl --pgdata=/usr/local/var/postgres --log=/dev/null start # start postgresql
 createuser api --createdb
 createdb $PROJECT_dev -U api
 ```
