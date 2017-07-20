@@ -6,6 +6,7 @@ import warnings
 
 import pytest
 
+import api
 from common import log
 import models
 
@@ -15,6 +16,17 @@ warnings.simplefilter("error")  # Make All warnings errors while testing.
 # If something else sets up logging first then this won't trigger.
 # For example: db.py calling logging.info() or such.
 log.init_logging()
+
+@pytest.fixture(scope='session')
+def appclient():
+    """
+    :return: test client for API app.
+    :rtype: flask.testing.FlaskClient
+    """
+    app = api.create_api()
+    client = app.test_client()
+
+    return client
 
 @pytest.fixture(scope='session')
 def createdb():
