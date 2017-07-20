@@ -25,7 +25,7 @@ def _create_app():
 
 def _health_check():
     """ Responds with True if the App is nominally handling requests """
-    return "True"
+    return flask.make_response("True", {'Content-Type': 'text/plain'})
 
 def create_api():
     """

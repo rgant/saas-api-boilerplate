@@ -18,3 +18,6 @@ def test_health_check(appclient):
     response = appclient.get('/health')
     assert response.status_code == 200
     assert response.data == b'True'
+    assert response.headers['Content-Type'] == 'text/plain'
+    assert 'Cache-Control' not in response.headers
+    assert 'Pragma' not in response.headers
