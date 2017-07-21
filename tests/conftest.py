@@ -26,6 +26,32 @@ def appclient():
     app = api.create_api()
     client = app.test_client()
 
+    # Helpers for testing API responses
+    def validate_response(response, response_code=200, content_type='application/vnd.api+json'):
+        """
+        Standard checks for any response from the server.
+        :param flask.Response response: Response to request from flask test client.
+        :param int response_code: Expected response code value.
+        :param str content_type: Expected response MIME type (Should be JSONAPI)
+        """
+        assert response.status_code == response_code
+
+        assert response.headers['Access-Control-Allow-Headers'] == \
+            'Authorization, Content-Type, X-Requested-With'
+        assert response.headers['Access-Control-Allow-Methods'] == 'GET, POST, PATCH, DELETE'
+        assert response.headers['Access-Control-Allow-Origin'] == '*'
+        assert response.headers['Access-Control-Max-Age'] == '86400'
+        assert response.headers['Cache-Control'] == 'private, max-age=60'
+        assert response.headers['Content-Type'] == content_type
+        if response_code != 204:
+            assert int(response.headers['Content-Length']) > 0
+        assert response.headers['Strict-Transport-Security'] == 'max-age=31536000; includeSubDomains'  # pylint: disable=line-too-long
+        assert 'Expires' not in response.headers
+        assert 'Pragma' not in response.headers
+        assert 'Vary' not in response.headers
+
+    client.validate_response = validate_response
+
     return client
 
 @pytest.fixture(scope='session')
