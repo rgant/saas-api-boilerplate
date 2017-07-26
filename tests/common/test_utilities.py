@@ -49,6 +49,10 @@ def test_camel_to_snake_case():
     for camel, snake in test_strings.items():
         assert utilities.camel_to_snake_case(camel) == snake
 
+def test_camel_to_kabob_case():
+    """ camel_to_snake_case also takes a glue parameter to allow for kabob case. """
+    assert utilities.camel_to_snake_case('Camel2Camel2Case', glue='-') == 'camel2-camel2-case'
+
 def test_is_common_password():
     """ Detect common passwords. """
     assert utilities.is_common_password('password')

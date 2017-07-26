@@ -13,7 +13,7 @@ import re
 from . import common_passwords
 
 
-def camel_to_snake_case(name):
+def camel_to_snake_case(name, glue='_'):
     """
     Convert CamelCase to snake_case.
     :param str name: CamelCase name to convert
@@ -22,8 +22,9 @@ def camel_to_snake_case(name):
     # From https://stackoverflow.com/a/1176023
     first_cap_re = re.compile('(.)([A-Z][a-z]+)')
     all_cap_re = re.compile('([a-z0-9])([A-Z])')
-    ex = first_cap_re.sub(r'\1_\2', name)
-    return all_cap_re.sub(r'\1_\2', ex).lower()
+    replacement = r'\1{glue}\2'.format(glue=glue)
+    ex = first_cap_re.sub(replacement, name)
+    return all_cap_re.sub(replacement, ex).lower()
 
 def is_valid_email_address(address):
     """
