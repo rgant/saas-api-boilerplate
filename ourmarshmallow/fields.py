@@ -35,4 +35,4 @@ class MetaData(Meta):
             self.container = cls_or_instance
 
     def _serialize(self, value, attr, obj):  # pylint: disable=arguments-differ
-        return {attr: self.container._serialize(value, attr, obj)}  # pylint: disable=protected-access
+        return {self.dump_to or attr: self.container._serialize(value, attr, obj)}  # pylint: disable=protected-access
