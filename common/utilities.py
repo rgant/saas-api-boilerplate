@@ -22,7 +22,7 @@ def camel_to_snake_case(name, glue='_'):
     # From https://stackoverflow.com/a/1176023
     first_cap_re = re.compile('(.)([A-Z][a-z]+)')
     all_cap_re = re.compile('([a-z0-9])([A-Z])')
-    replacement = r'\1{glue}\2'.format(glue=glue)
+    replacement = fr'\1{glue}\2'
     ex = first_cap_re.sub(replacement, name)
     return all_cap_re.sub(replacement, ex).lower()
 

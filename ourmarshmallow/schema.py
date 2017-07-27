@@ -20,6 +20,7 @@ class SchemaOpts(marshmallow_jsonapi.SchemaOpts, marshmallow_sqlalchemy.ModelSch
     This fixes the error: AttributeError: 'SchemaOpts' object has no attribute 'model_converter """
     pass
 
+
 class Schema(marshmallow_jsonapi.Schema, marshmallow_sqlalchemy.ModelSchema):
     """ Set custom options class to combine JSONAPI and SQLAlchemy. Set strict option by default.
     Configure DB connection on init. """
@@ -27,19 +28,21 @@ class Schema(marshmallow_jsonapi.Schema, marshmallow_sqlalchemy.ModelSchema):
 
     def __init__(self, *args, **kwargs):
         """
-        Each instance of the schema should have the current session with the DB
-        (marshmallow-sqlschema).
+        Combine the inits for marshmallow_jsonapi.Schema, marshmallow_sqlalchemy.ModelSchema.
+        Forces strict=True.
+        Forces session=db.connect().
+        Forces self.opts.type_ to kabob case of self.opts.model.__name__ for JSONAPI recommendation.
         """
-        # Force strict by default until https://github.com/marshmallow-code/marshmallow/issues/377
-        # TODO: ROB 20170726 Check status of marshmallow-code/marshmallow/issues/377
-        if 'strict' not in kwargs:
-            kwargs['strict'] = True
+        # TODO: ROB 20170726 Check status of github.com/marshmallow-code/marshmallow/issues/377
+        # Force strict by default until ticket is resolved.
+        kwargs['strict'] = True
 
+        # Each instance of the schema should have the current session with the DB
+        # (marshmallow-sqlschema).
         kwargs['session'] = db.connect()
 
-        # Automatically set the JSONAPI type based on model name
-        if not self.opts.type_ and self.opts.model:
-            # JSONAPI recommends kabobcase for naming: http://jsonapi.org/recommendations/#naming
-            self.opts.type_ = utilities.camel_to_snake_case(self.opts.model.__name__, glue='-')
+        # Automatically set the JSONAPI opts.type_ (marshmallow-jsonapi) based on model name.
+        # JSONAPI recommends kabobcase for naming: http://jsonapi.org/recommendations/#naming
+        self.opts.type_ = utilities.camel_to_snake_case(self.opts.model.__name__, glue='-')
 
         super().__init__(*args, **kwargs)
