@@ -14,6 +14,7 @@ import marshmallow_sqlalchemy
 from common import utilities
 from models import db
 
+from .fields import MetaData
 
 class SchemaOpts(marshmallow_jsonapi.SchemaOpts, marshmallow_sqlalchemy.ModelSchemaOpts):  # pylint: disable=too-few-public-methods
     """ Combine JSON API Schema Opts with SQLAlchemy Schema Opts.
@@ -25,6 +26,8 @@ class Schema(marshmallow_jsonapi.Schema, marshmallow_sqlalchemy.ModelSchema):
     """ Set custom options class to combine JSONAPI and SQLAlchemy. Set strict option by default.
     Configure DB connection on init. """
     OPTIONS_CLASS = SchemaOpts
+
+    modified_at = MetaData(marshmallow_jsonapi.fields.DateTime())
 
     def __init__(self, *args, **kwargs):
         """

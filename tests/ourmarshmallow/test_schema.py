@@ -8,6 +8,7 @@ except ImportError:
     import sys
     print("WARNING: Cannot Load builtins for py3 compatibility.", file=sys.stderr)
 
+import datetime
 import warnings
 
 import sqlalchemy as sa
@@ -39,7 +40,7 @@ def test_schema_session(dbsession):
 
 def test_schema_type():
     """
-    Schemas should have a session on init.
+    Schemas should type_ set to kabob case of model.__name__.
     """
     schema = DummySchema()
     assert schema.opts.type_ == 'dummy-model'
@@ -48,3 +49,14 @@ def test_schema_strict():
     """ Schema options should default to strict. """
     schema = DummySchema()
     assert schema.strict is True
+
+def test_schema_dump():
+    """ Should return JSONAPI envelop for DummyModel """
+    now = datetime.datetime(2017, 7, 27, 18, 6, 3)
+    the_model = DummyModel(id='45071', email='8cf0@4fc3.a865', modified_at=now)
+    the_schema = DummySchema()
+    data = the_schema.dump(the_model).data
+    expected = {'data': {'type': 'dummy-model', 'id': 45071,
+                         'attributes': {'email': '8cf0@4fc3.a865'},
+                         'meta': {'modified_at': '2017-07-27T18:06:03+00:00'}}}
+    assert data == expected
