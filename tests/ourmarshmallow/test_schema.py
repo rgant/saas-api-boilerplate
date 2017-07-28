@@ -40,7 +40,7 @@ def test_schema_session(dbsession):
 
 def test_schema_type():
     """
-    Schemas should type_ set to kabob case of model.__name__.
+    Schemas should type_ set to kebab-case of model.__name__.
     """
     schema = FakeSchema()
     assert schema.opts.type_ == 'fake-model'
@@ -51,7 +51,7 @@ def test_schema_strict():
     assert schema.strict is True
 
 def test_schema_dump():
-    """ Should return JSONAPI envelop for FakeModel """
+    """ Should return JSONAPI envelope for FakeModel. """
     now = datetime.datetime(2017, 7, 27, 18, 6, 3)
     the_model = FakeModel(id='45071', email='8cf0@4fc3.a865', modified_at=now)
     the_schema = FakeSchema()

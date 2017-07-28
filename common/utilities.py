@@ -13,11 +13,12 @@ import re
 from . import common_passwords
 
 
-def camel_to_snake_case(name, glue='_'):
+def camel_to_delimiter_separated(name, glue='_'):
     """
-    Convert CamelCase to snake_case.
+    Convert CamelCase to a delimiter-separated naming convention. Snake_case by default.
     :param str name: CamelCase name to convert
-    :return str: snake_case version of name
+    :param str glue: Delimiter to use, default is an underscore for snake_case.
+    :return str: delimiter-separated version of name
     """
     # From https://stackoverflow.com/a/1176023
     first_cap_re = re.compile('(.)([A-Z][a-z]+)')

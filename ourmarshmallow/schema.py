@@ -34,7 +34,7 @@ class Schema(marshmallow_jsonapi.Schema, marshmallow_sqlalchemy.ModelSchema):
         Combine the inits for marshmallow_jsonapi.Schema, marshmallow_sqlalchemy.ModelSchema.
         Forces strict=True.
         Forces session=db.connect().
-        Forces self.opts.type_ to kabob case of self.opts.model.__name__ for JSONAPI recommendation.
+        Forces self.opts.type_ to kebab-case of self.opts.model.__name__ for JSONAPI recommendation.
         """
         # TODO: ROB 20170726 Check status of github.com/marshmallow-code/marshmallow/issues/377
         # Force strict by default until ticket is resolved.
@@ -45,7 +45,7 @@ class Schema(marshmallow_jsonapi.Schema, marshmallow_sqlalchemy.ModelSchema):
         kwargs['session'] = db.connect()
 
         # Automatically set the JSONAPI opts.type_ (marshmallow-jsonapi) based on model name.
-        # JSONAPI recommends kabobcase for naming: http://jsonapi.org/recommendations/#naming
-        self.opts.type_ = utilities.camel_to_snake_case(self.opts.model.__name__, glue='-')
+        # JSONAPI recommends kebab-case for naming: http://jsonapi.org/recommendations/#naming
+        self.opts.type_ = utilities.camel_to_delimiter_separated(self.opts.model.__name__, glue='-')
 
         super().__init__(*args, **kwargs)

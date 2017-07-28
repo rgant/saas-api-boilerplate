@@ -68,7 +68,7 @@ class Base(object):
         :return str: name for table
         """
         if cls._cached_tablename is None:
-            cls._cached_tablename = utilities.camel_to_snake_case(cls.__name__)  # pylint: disable=no-member
+            cls._cached_tablename = utilities.camel_to_delimiter_separated(cls.__name__)  # pylint: disable=no-member
 
         return cls._cached_tablename
 
