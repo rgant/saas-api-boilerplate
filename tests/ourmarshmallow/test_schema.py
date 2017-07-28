@@ -16,8 +16,8 @@ import sqlalchemy as sa
 from models import bases
 import ourmarshmallow
 
-warnings.simplefilter("error")  # Make All warnings errors while testing.
 
+warnings.simplefilter("error")  # Make All warnings errors while testing.
 
 class FakeModel(bases.BaseModel):
     """ Copied from tests/models/test_base.py """
@@ -60,3 +60,19 @@ def test_schema_dump():
                          'attributes': {'email': '8cf0@4fc3.a865'},
                          'meta': {'modified_at': '2017-07-27T18:06:03+00:00'}}}
     assert data == expected
+
+def test_schema_load(dbsession):  # pylint: disable=unused-argument
+    """
+    Should unwrap the JSONAPI envelope into a FakeModel. Need a dbsession because load will attempt
+    to find an existing fake_model table row for id 19269667 so we must ensure the table exists.
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    """
+    data = {'data': {'type': 'fake-model', 'id': 19269667,
+                     'attributes': {'email': 'd0e0@443a.b9cf'},
+                     'meta': {'modified_at': '2017-07-28T17:11:51+00:00'}}}
+    the_schema = FakeSchema()
+    the_model = the_schema.load(data).data
+    assert isinstance(the_model, FakeModel)
+    assert the_model.id == data['data']['id']
+    assert the_model.email == data['data']['attributes']['email']
+    assert the_model.modified_at is None  # Meta values aren't loaded into the model.

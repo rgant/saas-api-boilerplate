@@ -20,6 +20,8 @@ class MetaData(Meta):
     def __init__(self, cls_or_instance, **kwargs):
         # Force dump_only=True.
         kwargs['dump_only'] = True
+        # Since we don't always know what the attribute is for this field, and Meta sets the
+        # load_from to '_meta' it is difficult to load this value so don't.
 
         super().__init__(**kwargs)
 
