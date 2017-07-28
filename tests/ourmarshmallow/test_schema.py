@@ -19,15 +19,15 @@ import ourmarshmallow
 warnings.simplefilter("error")  # Make All warnings errors while testing.
 
 
-class DummyModel(bases.BaseModel):
+class FakeModel(bases.BaseModel):
     """ Copied from tests/models/test_base.py """
     email = sa.Column(sa.String(50), unique=True, nullable=False)
 
 
-class DummySchema(ourmarshmallow.Schema):
+class FakeSchema(ourmarshmallow.Schema):
     """ For testing schemas. """
     class Meta(object):  # pylint: disable=missing-docstring,too-few-public-methods
-        model = DummyModel
+        model = FakeModel
 
 
 def test_schema_session(dbsession):
@@ -35,28 +35,28 @@ def test_schema_session(dbsession):
     Schemas should have a session on init.
     :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
     """
-    schema = DummySchema()
+    schema = FakeSchema()
     assert schema.session == dbsession
 
 def test_schema_type():
     """
     Schemas should type_ set to kabob case of model.__name__.
     """
-    schema = DummySchema()
-    assert schema.opts.type_ == 'dummy-model'
+    schema = FakeSchema()
+    assert schema.opts.type_ == 'fake-model'
 
 def test_schema_strict():
     """ Schema options should default to strict. """
-    schema = DummySchema()
+    schema = FakeSchema()
     assert schema.strict is True
 
 def test_schema_dump():
-    """ Should return JSONAPI envelop for DummyModel """
+    """ Should return JSONAPI envelop for FakeModel """
     now = datetime.datetime(2017, 7, 27, 18, 6, 3)
-    the_model = DummyModel(id='45071', email='8cf0@4fc3.a865', modified_at=now)
-    the_schema = DummySchema()
+    the_model = FakeModel(id='45071', email='8cf0@4fc3.a865', modified_at=now)
+    the_schema = FakeSchema()
     data = the_schema.dump(the_model).data
-    expected = {'data': {'type': 'dummy-model', 'id': 45071,
+    expected = {'data': {'type': 'fake-model', 'id': 45071,
                          'attributes': {'email': '8cf0@4fc3.a865'},
                          'meta': {'modified_at': '2017-07-27T18:06:03+00:00'}}}
     assert data == expected
