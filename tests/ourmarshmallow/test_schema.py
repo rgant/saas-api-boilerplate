@@ -74,7 +74,7 @@ def test_schema_dump():
     the_model = FakeModel(id='45071', email='8cf0@4fc3.a865', modified_at=now)
     the_schema = FakeModelSchema()
     data = the_schema.dump(the_model).data
-    expected = {'data': {'type': 'fake-model', 'id': 45071,
+    expected = {'data': {'type': 'fake-model', 'id': '45071',
                          'attributes': {'email': '8cf0@4fc3.a865'},
                          'relationships': {'fake_relation': {
                              'data': None,
@@ -91,12 +91,12 @@ def test_schema_load(dbsession):  # pylint: disable=unused-argument
     to find an existing fake_model table row for id 19269667 so we must ensure the table exists.
     :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
     """
-    data = {'data': {'type': 'fake-model', 'id': 19269667,
+    data = {'data': {'type': 'fake-model', 'id': '19269667',
                      'attributes': {'email': 'd0e0@443a.b9cf'},
                      'meta': {'modified_at': '2017-07-28T17:11:51+00:00'}}}
     the_schema = FakeModelSchema()
     the_model = the_schema.load(data).data
     assert isinstance(the_model, FakeModel)
-    assert the_model.id == data['data']['id']
+    assert the_model.id == int(data['data']['id'])
     assert the_model.email == data['data']['attributes']['email']
     assert the_model.modified_at is None  # Meta values aren't loaded into the model.

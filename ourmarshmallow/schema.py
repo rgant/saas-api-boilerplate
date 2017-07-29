@@ -57,6 +57,7 @@ class Schema(marshmallow_jsonapi.Schema, marshmallow_sqlalchemy.ModelSchema):
     Configure DB connection on init. """
     OPTIONS_CLASS = SchemaOpts
 
+    id = marshmallow_jsonapi.fields.Integer(as_string=True)  # pylint: disable=invalid-name
     modified_at = MetaData(marshmallow_jsonapi.fields.DateTime())
 
     def __init__(self, *args, **kwargs):
