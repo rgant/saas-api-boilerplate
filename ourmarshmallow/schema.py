@@ -1,5 +1,5 @@
 """
-Customized Marshmallow-SQLAlchemy and Marshmallow-JSONAPI Schemas to combine Meta data.
+Customized Marshmallow-SQLAlchemy and Marshmallow-JSONAPI Schemas to combine Schema Meta data.
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 try:
@@ -14,12 +14,42 @@ import marshmallow_sqlalchemy
 from common import utilities
 from models import db
 
+from .convert import ModelConverter
 from .fields import MetaData
+
 
 class SchemaOpts(marshmallow_jsonapi.SchemaOpts, marshmallow_sqlalchemy.ModelSchemaOpts):  # pylint: disable=too-few-public-methods
     """ Combine JSON API Schema Opts with SQLAlchemy Schema Opts.
     This fixes the error: AttributeError: 'SchemaOpts' object has no attribute 'model_converter """
-    pass
+    def __init__(self, meta, *args, **kwargs):
+        """
+        Forces strict=True.
+        Forces type_ to kebab-case of self.opts.model.__name__ for JSONAPI recommendation.
+        """
+
+        # TODO: ROB 20170726 Check status of github.com/marshmallow-code/marshmallow/issues/377
+        # Force strict by default until ticket is resolved.
+        meta.strict = True
+
+        # When the base Schema below is first initialized there won't be a model element.
+        model = getattr(meta, 'model', None)
+        if model:
+            # Automatically set the JSONAPI type (marshmallow-jsonapi) based on model name.
+            # JSONAPI recommends kebab-case for naming: http://jsonapi.org/recommendations/#naming
+            type_ = utilities.camel_to_delimiter_separated(model.__name__, glue='-')
+            meta.type_ = type_
+
+            # Self URLs are always based on the JSONAPI type and the model id
+            meta.self_url = f'/{type_}/{{id}}'
+            meta.self_url_kwargs = {'id': '<id>'}
+
+            # Only include the self_url_many if the Schema declares listable=True
+            if getattr(meta, 'listable', False):
+                meta.self_url_many = f'/{type_}'
+
+        # Use our custom ModelConverter to turn SQLAlchemy relations into JSONAPI Relationships.
+        meta.model_converter = ModelConverter
+        super().__init__(meta, *args, **kwargs)
 
 
 class Schema(marshmallow_jsonapi.Schema, marshmallow_sqlalchemy.ModelSchema):
@@ -32,20 +62,10 @@ class Schema(marshmallow_jsonapi.Schema, marshmallow_sqlalchemy.ModelSchema):
     def __init__(self, *args, **kwargs):
         """
         Combine the inits for marshmallow_jsonapi.Schema, marshmallow_sqlalchemy.ModelSchema.
-        Forces strict=True.
         Forces session=db.connect().
-        Forces self.opts.type_ to kebab-case of self.opts.model.__name__ for JSONAPI recommendation.
         """
-        # TODO: ROB 20170726 Check status of github.com/marshmallow-code/marshmallow/issues/377
-        # Force strict by default until ticket is resolved.
-        kwargs['strict'] = True
-
         # Each instance of the schema should have the current session with the DB
-        # (marshmallow-sqlschema).
+        # (marshmallow-sqlschema). This must be done on instance init, not on class creation!
         kwargs['session'] = db.connect()
-
-        # Automatically set the JSONAPI opts.type_ (marshmallow-jsonapi) based on model name.
-        # JSONAPI recommends kebab-case for naming: http://jsonapi.org/recommendations/#naming
-        self.opts.type_ = utilities.camel_to_delimiter_separated(self.opts.model.__name__, glue='-')
 
         super().__init__(*args, **kwargs)

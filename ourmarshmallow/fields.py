@@ -10,11 +10,12 @@ except ImportError:
 
 from marshmallow.base import FieldABC
 # Make marshmallow core and jsonapi fields importable from ourmarshmallow
-from marshmallow_jsonapi.fields import *  # pylint: disable=wildcard-import,unused-wildcard-import
+from marshmallow.fields import *  # pylint: disable=wildcard-import,unused-wildcard-import
+import marshmallow_jsonapi.fields
+import marshmallow_sqlalchemy.fields
 
 
-# Meta is part of marshmallow_jsonapi.fields
-class MetaData(Meta):
+class MetaData(marshmallow_jsonapi.fields.Meta):
     """ Per-field metadata wrapper. Turns another field into MetaData.
     Based on marshmallow.fields.List """
     def __init__(self, cls_or_instance, **kwargs):
@@ -38,3 +39,21 @@ class MetaData(Meta):
 
     def _serialize(self, value, attr, obj):  # pylint: disable=arguments-differ
         return {self.dump_to or attr: self.container._serialize(value, attr, obj)}  # pylint: disable=protected-access
+
+
+class Relationship(marshmallow_jsonapi.fields.Relationship, marshmallow_sqlalchemy.fields.Related):
+    """
+    Combine the marshmallow-jsonapi.fields.Relationship with marshmallow-sqlalchemy.fields.Related.
+    """
+    def __init__(self, *args, **kwargs):
+        # Always include the resource linkage for HATEOS.
+        kwargs['include_resource_linkage'] = True
+
+        # Calculate our relationship URLs beased on the parent schema's self_url
+        if 'parent_self_url' in kwargs:
+            kwargs['self_url'] = '{0}/relationships/{1}'.format(kwargs['parent_self_url'],
+                                                                kwargs['type_'])
+            kwargs['related_url'] = '{0}/{1}'.format(kwargs['parent_self_url'], kwargs['type_'])
+            kwargs['related_url_kwargs'] = kwargs['self_url_kwargs']
+
+        super().__init__(*args, **kwargs)
