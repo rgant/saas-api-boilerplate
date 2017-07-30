@@ -49,6 +49,11 @@ class SchemaOpts(marshmallow_jsonapi.SchemaOpts, marshmallow_sqlalchemy.ModelSch
 
         # Use our custom ModelConverter to turn SQLAlchemy relations into JSONAPI Relationships.
         meta.model_converter = ModelConverter
+
+        def dasherize(text):
+            return text.replace('_', '-')
+        meta.inflect = dasherize
+
         super().__init__(meta, *args, **kwargs)
 
 

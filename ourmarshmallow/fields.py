@@ -50,10 +50,11 @@ class Relationship(marshmallow_jsonapi.fields.Relationship, marshmallow_sqlalche
         kwargs['include_resource_linkage'] = True
 
         # Calculate our relationship URLs beased on the parent schema's self_url
-        if 'parent_self_url' in kwargs:
+        if 'parent_self_url' in kwargs and 'relationship_name' in kwargs:
             kwargs['self_url'] = '{0}/relationships/{1}'.format(kwargs['parent_self_url'],
-                                                                kwargs['type_'])
-            kwargs['related_url'] = '{0}/{1}'.format(kwargs['parent_self_url'], kwargs['type_'])
+                                                                kwargs['relationship_name'])
+            kwargs['related_url'] = '{0}/{1}'.format(kwargs['parent_self_url'],
+                                                     kwargs['relationship_name'])
             kwargs['related_url_kwargs'] = kwargs['self_url_kwargs']
 
         super().__init__(*args, **kwargs)
