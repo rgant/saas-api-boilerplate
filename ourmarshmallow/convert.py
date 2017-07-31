@@ -35,8 +35,9 @@ class ModelConverter(marshmallow_sqlalchemy.ModelConverter):
         # JSONAPI type is calculated from Model name to kebab-case.
         kwargs['type_'] = utilities.camel_to_delimiter_separated(prop.mapper.class_.__name__,
                                                                  glue='-')
+        # self.schema_cls is not an instance of the class so we need to use the options directly.
         # Name of the relationship on parent model to use for constructing relationship URLs.
-        kwargs['relationship_name'] = prop.key.replace('_', '-')
+        kwargs['relationship_name'] = self.schema_cls.opts.inflect(prop.key)
         # The relationship's URLs will be calculated from the parent schema's self URL.
         kwargs['parent_self_url'] = self.schema_cls.opts.self_url
         # Relationship URLs will use the same kwargs as the parent schema.

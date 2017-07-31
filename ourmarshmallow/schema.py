@@ -51,6 +51,11 @@ class SchemaOpts(marshmallow_jsonapi.SchemaOpts, marshmallow_sqlalchemy.ModelSch
         meta.model_converter = ModelConverter
 
         def dasherize(text):
+            """
+            Convert snake_case field names to jsonapi kebab-case.
+            :param str text: field name
+            :return str: kebab-case name
+            """
             return text.replace('_', '-')
         meta.inflect = dasherize
 

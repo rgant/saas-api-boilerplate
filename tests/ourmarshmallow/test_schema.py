@@ -76,7 +76,6 @@ def test_schema_dump():
                           modified_at=now)
     the_schema = FakeModelSchema()
     data = the_schema.dump(the_model).data
-    print(data)
     expected = {'data': {'type': 'fake-model', 'id': '45071',
                          'attributes': {'email': '8cf0@4fc3.a865',
                                         'full-name': 'eed5631b 3bd038939b5c'},
