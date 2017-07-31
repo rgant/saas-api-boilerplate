@@ -25,7 +25,11 @@ class SchemaOpts(marshmallow_jsonapi.SchemaOpts, marshmallow_sqlalchemy.ModelSch
         """
         Forces strict=True.
         Forces type_ to kebab-case of self.opts.model.__name__ for JSONAPI recommendation.
+        Sets up default self_url and kwargs if model option is set.
+        Sets up default self_url_many if model and listable are truthy.
         """
+        # Does Resource support a list endpoint? Default False.
+        self.listable = getattr(meta, 'listable', False)
 
         # TODO: ROB 20170726 Check status of github.com/marshmallow-code/marshmallow/issues/377
         # Force strict by default until ticket is resolved.

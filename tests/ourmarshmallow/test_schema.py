@@ -40,6 +40,7 @@ class FakeRelationSchema(ourmarshmallow.Schema):
     """ For testing schemas. """
     class Meta(object):  # pylint: disable=missing-docstring,too-few-public-methods
         model = FakeRelation
+        listable = True
 
 
 class FakeModelSchema(ourmarshmallow.Schema):
@@ -48,6 +49,11 @@ class FakeModelSchema(ourmarshmallow.Schema):
         model = FakeModel
         include_fk = True  # Include the email ForeignKey in Schema
 
+
+def test_schema_opt_class():
+    """ Schema should default to our SchemaOpts class. """
+    schema = FakeModelSchema()
+    assert issubclass(schema.OPTIONS_CLASS, ourmarshmallow.schema.SchemaOpts)
 
 def test_schema_session(dbsession):
     """
@@ -68,6 +74,63 @@ def test_schema_strict():
     """ Schema options should default to strict. """
     schema = FakeModelSchema()
     assert schema.strict is True
+
+def test_schema_converter():
+    """ Schema should use our custom ModelConverter to support JSONAPI Relationship fields. """
+    schema = FakeModelSchema()
+    assert issubclass(schema.opts.model_converter, ourmarshmallow.convert.ModelConverter)
+
+def test_schema_self_url():
+    """ Schema self_url and self_url_kwargs should be automatically set from model name. """
+    schema = FakeModelSchema()
+    assert schema.opts.self_url == f'/{schema.opts.type_}/{{id}}'
+    assert schema.opts.self_url_kwargs == {'id': '<id>'}
+
+def test_schema_listable_default():
+    """ By default the listable option should be False. """
+    schema = FakeModelSchema()
+    assert schema.opts.listable is False
+    assert schema.opts.self_url_many is None
+
+def test_schema_self_url_many():
+    """
+    Setting the listable option on schema should also set the self_url_many option automatically.
+    """
+    schema = FakeRelationSchema()
+    assert schema.opts.listable is True
+    assert schema.opts.self_url_many == f'/{schema.opts.type_}'
+    assert schema.opts.self_url.startswith(schema.opts.self_url_many)
+
+def test_schema_inflect():
+    """ attribute inflection should convert snake_case names to kebab-case. """
+    schema = FakeModelSchema()
+    test_strings = {
+        'test': 'test',
+        'Test': 'Test',
+        'TEST': 'TEST',
+        'snakes_On_A_Plane': 'snakes-On-A-Plane',
+        'Snakes_On_A_Plane': 'Snakes-On-A-Plane',
+        'snakes_on_a_plane': 'snakes-on-a-plane',
+        'I_Phone_Hysteria': 'I-Phone-Hysteria',
+        'i_phone_hysteria': 'i-phone-hysteria',
+        '_Test': '-Test',
+        '_test_Method': '-test-Method',
+        '__test__Method': '--test--Method',
+        '__CamelCase': '--CamelCase',
+        '_Camel_Case': '-Camel-Case'
+    }
+
+    for snake, dasher in test_strings.items():
+        assert schema.inflect(snake) == dasher
+
+def test_schema_default_columns():
+    """ All Schemas should default to an id and modified_at field. """
+    schema = FakeModelSchema()
+    assert isinstance(schema.declared_fields['id'], ourmarshmallow.fields.Integer)
+    assert schema.declared_fields['id'].as_string is True
+    assert isinstance(schema.declared_fields['modified_at'], ourmarshmallow.fields.MetaData)
+    assert isinstance(schema.declared_fields['modified_at'].container,
+                      ourmarshmallow.fields.DateTime)
 
 def test_schema_dump():
     """ Should return JSONAPI envelope for FakeModel. """
