@@ -80,7 +80,6 @@ def test_schema_dump():
                          'attributes': {'email': '8cf0@4fc3.a865',
                                         'full-name': 'eed5631b 3bd038939b5c'},
                          'relationships': {'fake-relation': {
-                             'data': None,
                              'links': {'self': '/fake-model/45071/relationships/fake-relation',
                                        'related': '/fake-model/45071/fake-relation'}}},
                          'links': {'self': '/fake-model/45071'},

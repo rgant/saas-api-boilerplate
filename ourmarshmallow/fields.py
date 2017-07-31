@@ -46,9 +46,6 @@ class Relationship(marshmallow_jsonapi.fields.Relationship, marshmallow_sqlalche
     Combine the marshmallow-jsonapi.fields.Relationship with marshmallow-sqlalchemy.fields.Related.
     """
     def __init__(self, *args, **kwargs):
-        # Always include the resource linkage for HATEOS.
-        kwargs['include_resource_linkage'] = True
-
         # Calculate our relationship URLs beased on the parent schema's self_url
         if 'parent_self_url' in kwargs and 'relationship_name' in kwargs:
             kwargs['self_url'] = '{0}/relationships/{1}'.format(kwargs['parent_self_url'],
