@@ -13,6 +13,7 @@ import warnings
 
 import pytest
 import sqlalchemy as sa
+import sqlalchemy_utils.functions
 
 from models import bases
 
@@ -69,6 +70,16 @@ def test_base_repr():
     dmodel = DummyModel()
     assert repr(dmodel) == ('tests.models.test_base.DummyModel(modified_at=<not loaded>, '
                             'id=<not loaded>, email=<not loaded>)')
+
+def test_base_default_fields():
+    """
+    All Base and BaseModel should have a modified_at column. BaseModel should have an id column.
+    """
+    assert not hasattr(DummyBase, 'id')
+    assert isinstance(sqlalchemy_utils.functions.get_type(DummyBase.modified_at), sa.DateTime)
+
+    assert isinstance(sqlalchemy_utils.functions.get_type(DummyModel.id), sa.Integer)
+    assert isinstance(sqlalchemy_utils.functions.get_type(DummyModel.modified_at), sa.DateTime)
 
 def test_basemodel_save(dbsession):  # pylint: disable=unused-argument
     """
