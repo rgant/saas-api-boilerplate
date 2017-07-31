@@ -47,7 +47,8 @@ class Relationship(marshmallow_jsonapi.fields.Relationship, marshmallow_sqlalche
     """
     def __init__(self, *args, **kwargs):
         # Calculate our relationship URLs beased on the parent schema's self_url
-        if 'parent_self_url' in kwargs and 'relationship_name' in kwargs:
+        needed_fields = ('parent_self_url', 'relationship_name', 'self_url_kwargs')
+        if all(field in kwargs for field in needed_fields):
             kwargs['self_url'] = '{0}/relationships/{1}'.format(kwargs['parent_self_url'],
                                                                 kwargs['relationship_name'])
             kwargs['related_url'] = '{0}/{1}'.format(kwargs['parent_self_url'],

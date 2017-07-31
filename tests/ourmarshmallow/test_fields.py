@@ -41,3 +41,11 @@ def test_metadata_dump_to():
     field = ourmarshmallow.fields.MetaData(ourmarshmallow.fields.Int, dump_to='page')
     result = field.serialize('offset', {'offset': 1})
     assert result == {'page': 1}
+
+def test_relationship_defaults():
+    """ Automatically set self_url and related_url based on parent url and relationship name. """
+    field = ourmarshmallow.fields.Relationship(parent_self_url='/foo/bar', relationship_name='baz',
+                                               self_url_kwargs={'quz': 'corge'})
+    assert field.self_url == '/foo/bar/relationships/baz'
+    assert field.related_url == '/foo/bar/baz'
+    assert field.related_url_kwargs == {'quz': 'corge'}
