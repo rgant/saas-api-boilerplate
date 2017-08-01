@@ -18,6 +18,15 @@ from .fields import Relationship
 class ModelConverter(marshmallow_sqlalchemy.ModelConverter):
     """ Customize SQLAlchemy Model Converter to use JSON API Relationships. """
 
+    # property2field will convert the Relationship to a List field if the prop.direction.name in
+    # this mapping returns True. Hack to work around that since this mapping is only used there.
+    # https://github.com/marshmallow-code/marshmallow-sqlalchemy/blob/af8304a33bfc11468d9ddb6c96e183964806d637/marshmallow_sqlalchemy/convert.py#L131
+    DIRECTION_MAPPING = {
+        'MANYTOONE': False,
+        'MANYTOMANY': False,
+        'ONETOMANY': False,
+    }
+
     def _get_field_class_for_property(self, prop):
         """ Use our Relationship field type for SQLAlchemy relations instead. """
         if hasattr(prop, 'direction'):
