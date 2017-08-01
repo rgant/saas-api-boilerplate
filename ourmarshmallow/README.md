@@ -1,10 +1,10 @@
 ## Combining marshmallow-jsonapi and marshmallow-sqlalchmey
 
-[marshmallow-sqlalchemy](marshmallow-code/marshmallow-sqlalchemy) includes a ModelConverter that will map SQLAlchemy types to [Marshmallow](marshmallow-code/marshmallow) field types. However it will map relations to a marshmallow-sqlalchemy Relation which on serialization will be output to the data in the Relation. In [marshmallow-jsonapi](marshmallow-code/marshmallow-jsonapi) we would rather have those SQLAlchemy relations be converted into Relationship fields. This document describes how to arrange for that conversion with a minimum of duplication of efforts.
+[marshmallow-sqlalchemy](https://github.com/marshmallow-code/marshmallow-sqlalchemy) includes a ModelConverter that will map SQLAlchemy types to [Marshmallow](https://github.com/marshmallow-code/marshmallow) field types. However it will map relations to a marshmallow-sqlalchemy Relation which on serialization will be output to the data in the Relation. In [marshmallow-jsonapi](https://github.com/marshmallow-code/marshmallow-jsonapi) we would rather have those SQLAlchemy relations be converted into Relationship fields. This document describes how to arrange for that conversion with a minimum of duplication of efforts.
 
 ### Default Assumptions
 
-Producing this conversion automatically relies on several assumptions and automatic calculations to automatically configure the relationships. For the purposes of this documentation "model" shall refer to an SQLAlchemy ORM declarative base derived class, and "schema" shall refer to a marshmallow Schema derived class.
+Producing this conversion automatically relies on several assumptions and automatic calculations to configure the relationships. For the purposes of this documentation "model" shall refer to an SQLAlchemy ORM declarative base derived class, and "schema" shall refer to a marshmallow Schema derived class.
 
 1. The class name for a schema for a model should be the `model.__name__ + 'Schema'`.
 2. The marshmallow-jsonapi `type_` option for the schema will be automatically set to the `model.__name__`.
@@ -78,7 +78,7 @@ data = schema.dump(articles).data
 
 ### Customized Relationship Field
 
-In [ourmarshmallow.fields](ourmarshmallow/fields.py) the Relationship class customizations:
+In [ourmarshmallow.fields](fields.py) the Relationship class customizations:
 
 * `parent_self_url` is the `self_url` option for the schema containing the Relationship field.
   * Example: `ArticlesSchema.opts.self_url == '/articles/{id}'`
@@ -96,7 +96,7 @@ These values, plus `self_url_kwargs` are set automatically by the converter when
 
 ### Customized ModelConverter
 
-In [ourmarshmallow.convert](ourmarshmallow/convert.py) the ModelConverter class customizations:
+In [ourmarshmallow.convert](convert.py) the ModelConverter class customizations:
 
 * All `DIRECTION_MAPPING` keys are set to `False` values so that to many relations aren't wrapped in a List. This is a hack that isn't very pretty.
 * `_get_field_class_for_property` checks for the SQLAlchemy property to have a direction attribute, if so it returns our customized Relationship class. Otherwise it returns the super() method.
@@ -108,7 +108,7 @@ In [ourmarshmallow.convert](ourmarshmallow/convert.py) the ModelConverter class 
   * `Relationship(type_)` parameter is set to the (dasherized) version of `model.__name__`.
     * Example: `camel_to_kebab_case(CamelCase.__name__) == 'camel-case'`
   * `Relationship(relationship_name)` parameter is set to the (dasherized) version of the attribute name for the SQLAlchemy relation.
-    * Example: `kwargs['relationship_name'] == Comments.author.prop.key`
+    * Example: `kwargs['relationship_name'] == dasherize(Comments.author.prop.key)`
   * `Relationship(parent_self_url)` parameter is set to the `self_url` of the `schema_cls` for the converter.
     * Example: `kwargs['parent_self_url'] = CommentsSchema.opts.self_url`
   * `Relationship(self_url_kwargs)` parameter is set to the `self_url_kwargs` of the `schema_cls` for the converter.
@@ -116,7 +116,7 @@ In [ourmarshmallow.convert](ourmarshmallow/convert.py) the ModelConverter class 
 
 ### Customized Schema
 
-In [ourmarshmallow.schema](ourmarshmallow/schema.py) the Schema is customized for more than just merging marshmallow-jsonapi and marshmallow-sqlalchemy. The customizations are:
+In [ourmarshmallow.schema](schema.py) the Schema is customized for more than just merging marshmallow-jsonapi and marshmallow-sqlalchemy. The customizations are:
 
 * Re-define the `id` field to be an `Integer(as_string=True)` to better implement JSONAPI spec where identifiers must be strings.
 * Re-define the `modified_at` DateTime column to use our customized MetaData field type.
@@ -124,7 +124,7 @@ In [ourmarshmallow.schema](ourmarshmallow/schema.py) the Schema is customized fo
 * On `Schema.__init__` set the marshmallow-sqlalchemy Schema session to the current session. This makes sure that whenever a Schema class is instantiated that we have the current SQLAlchemy session.
 * Use a custom SCHEMA_OPTS class to customized the options for our schemas.
   * Add a new `listable` option to our Schemas. When this is `True` then the `self_url_many` option for this schema is automatically set.
-  * Always set `strict` option to `True` for our schemas. (Pending marshmallow-code/marshmallow/issues/377 resolution.)
+  * Always set `strict` option to `True` for our schemas. (Pending marshmallow-code/marshmallow#377 resolution.)
   * If the marshmallow-sqlalchmey `model` option for the schema is set then:
     * Set the `type_` option to the (dasherized) `model.__name__`.
     * Set `self_url` option to the `'/' + type_ + '/{id}'`.
