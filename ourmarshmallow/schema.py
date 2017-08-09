@@ -8,6 +8,7 @@ except ImportError:
     import sys
     print("WARNING: Cannot Load builtins for py3 compatibility.", file=sys.stderr)
 
+import marshmallow as ma
 import marshmallow_jsonapi
 import marshmallow_sqlalchemy
 
@@ -15,6 +16,7 @@ from common import utilities
 from models import db
 
 from .convert import ModelConverter
+from .exceptions import MissingIdError, MismatchIdError
 from .fields import MetaData
 
 
@@ -71,7 +73,9 @@ class Schema(marshmallow_jsonapi.Schema, marshmallow_sqlalchemy.ModelSchema):
     Configure DB connection on init. """
     OPTIONS_CLASS = SchemaOpts
 
+    # id must be a string: http://jsonapi.org/format/#document-resource-object-identification
     id = marshmallow_jsonapi.fields.Integer(as_string=True)  # pylint: disable=invalid-name
+    # This field is read only, place in meta data: http://jsonapi.org/format/#document-meta
     modified_at = MetaData(marshmallow_jsonapi.fields.DateTime())
 
     def __init__(self, *args, **kwargs):
@@ -84,3 +88,24 @@ class Schema(marshmallow_jsonapi.Schema, marshmallow_sqlalchemy.ModelSchema):
         kwargs['session'] = db.connect()
 
         super().__init__(*args, **kwargs)
+
+    def unwrap_item(self, item):
+        """
+        If the schema has an existing instance the id field must be set.
+        :raises MissingIdError: id field isn't present when required.
+        """
+        if self.instance and 'id' not in item:
+            raise MissingIdError()
+
+        return super().unwrap_item(item)
+
+    @ma.validates('id')
+    def validate_id(self, value):
+        """
+        If the schema has an existing instance the id value must match id. Use custom errors so we
+        can generate to the correct source.pointer and response code.
+        :param int value: identifier from payload.
+        :raises MismatchIdError: id field doesn't match self.instance.
+        """
+        if self.instance and self.instance.id != value:
+            raise MismatchIdError(actual=value, expected=self.instance.id)

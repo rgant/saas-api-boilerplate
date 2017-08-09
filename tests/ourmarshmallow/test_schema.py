@@ -11,6 +11,7 @@ except ImportError:
 import datetime
 import warnings
 
+import pytest
 import sqlalchemy as sa
 import sqlalchemy.orm as saorm
 
@@ -135,7 +136,7 @@ def test_schema_default_columns():
 def test_schema_dump():
     """ Should return JSONAPI envelope for FakeModel. """
     now = datetime.datetime(2017, 7, 27, 18, 6, 3)
-    the_model = FakeModel(id='45071', email='8cf0@4fc3.a865', full_name='eed5631b 3bd038939b5c',
+    the_model = FakeModel(id=45071, email='8cf0@4fc3.a865', full_name='eed5631b 3bd038939b5c',
                           modified_at=now)
     the_schema = FakeModelSchema()
     data = the_schema.dump(the_model).data
@@ -167,3 +168,56 @@ def test_schema_load(dbsession):  # pylint: disable=unused-argument
     assert the_model.email == data['data']['attributes']['email']
     assert the_model.full_name == data['data']['attributes']['full-name']
     assert the_model.modified_at is None  # Meta values aren't loaded into the model.
+
+def test_schema_load_without_id():
+    """ id isn't required on load. """
+    data = {'data': {'type': 'fake-model',
+                     'attributes': {'email': '0a97@4e42.994d',
+                                    'full-name': '8e8ac2d1 2e7904048885'}}}
+    the_schema = FakeModelSchema()
+    the_model = the_schema.load(data).data
+    assert isinstance(the_model, FakeModel)
+    assert the_model.id is None
+    assert the_model.email == data['data']['attributes']['email']
+    assert the_model.full_name == data['data']['attributes']['full-name']
+
+def test_instance_requires_id():
+    """ When loading schemas into an existing instance the id must exist. """
+    the_model = FakeModel(id=4, email='3c6e@4638.9834', full_name='79826dc9 f864dee2dbe7')
+
+    data = {'data': {'type': 'fake-model', 'id': '4',
+                     'attributes': {'email': 'ba40@4c91.8ba4',
+                                    'full-name': '9ffc634b d9f11b47cf97'}}}
+    the_schema = FakeModelSchema()
+    the_schema.load(data, instance=the_model)
+    assert the_model.id == 4
+    assert the_model.email == data['data']['attributes']['email']
+    assert the_model.full_name == data['data']['attributes']['full-name']
+
+def test_instance_missing_id():
+    """ Error should be raised when id is missing from data in schema load with instance. """
+    the_model = FakeModel(id=7, email='cc66@44ab.994f', full_name='75fea687 10dcd18e4b74')
+
+    data = {'data': {'type': 'fake-model',
+                     'attributes': {'email': '443d@4e0b.8eb1',
+                                    'full-name': 'a72f6d46 fa4a23cc0750'}}}
+    the_schema = FakeModelSchema()
+    with pytest.raises(ourmarshmallow.exceptions.MissingIdError):
+        the_schema.load(data, instance=the_model)
+
+    assert the_model.email == 'cc66@44ab.994f'
+    assert the_model.full_name == '75fea687 10dcd18e4b74'
+
+def test_instance_mismatched_id():
+    """ Error should be raised when id from data in schema load doesn't match the instance id. """
+    the_model = FakeModel(id=3, email='4271@4f2c.a021', full_name='a7fbacd4 4948b217d9b6')
+
+    data = {'data': {'type': 'fake-model', 'id': '1',
+                     'attributes': {'email': '03d8@4e3c.af63',
+                                    'full-name': '3a9b905d bd1be0b0f5e9'}}}
+    the_schema = FakeModelSchema()
+    with pytest.raises(ourmarshmallow.exceptions.MismatchIdError):
+        the_schema.load(data, instance=the_model)
+
+    assert the_model.email == '4271@4f2c.a021'
+    assert the_model.full_name == 'a7fbacd4 4948b217d9b6'
