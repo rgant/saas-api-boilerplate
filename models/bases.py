@@ -132,9 +132,14 @@ class BaseModel(Base):
         session = db.connect()  # Scoped Session for models.
         return session.query(cls).filter(cls.id == the_id).one_or_none()
 
-    def save(self):
-        """ Add this model to the session. Does not flush the session. """
+    def save(self, flush=False):
+        """
+        Add this model to the session. Does not flush the session.
+        :param bool flush: Also flush the session after adding model.
+        """
         logger = logging.getLogger(__name__)
         session = db.connect()  # Scoped Session for models.
         session.add(self)
+        if flush:
+            session.flush() # Send INSERT/UPDATE to DB, but don't commit the transaction.
         logger.info('Added %r', self)

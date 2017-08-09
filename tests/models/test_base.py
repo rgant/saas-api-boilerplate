@@ -83,7 +83,7 @@ def test_base_default_fields():
 
 def test_basemodel_save(dbsession):  # pylint: disable=unused-argument
     """
-    BaseModels are Session Aware and save themselves. They do not flush however.
+    BaseModels are Session Aware and save themselves. They do not flush by default however.
     :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
     """
     dmodel = DummyModel(email='7cf0@496d.aa5e')
@@ -91,6 +91,22 @@ def test_basemodel_save(dbsession):  # pylint: disable=unused-argument
     assert dmodel.id is None
     assert dmodel.modified_at is None
     assert dmodel.email == '7cf0@496d.aa5e'
+
+def test_basemodel_save_flush(dbsession):  # pylint: disable=unused-argument
+    """
+    BaseModels are Session Aware and save themselves this time with flush after save.
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    """
+    dmodel = DummyModel(email='639f@4054.bca6')
+    dmodel.save(flush=True)
+    # MySQL doesnt' support microseconds in datetime columns, but PostgreSQL does. Either way
+    # comparing them won't work so remove.
+    now = datetime.datetime.utcnow().replace(microsecond=0)
+    assert dmodel.id == 2
+    # PostgreSQL includes microseconds, comparing them won't work so remove
+    mod_at = dmodel.modified_at.replace(microsecond=0)
+    assert mod_at == now
+    assert dmodel.email == '639f@4054.bca6'
 
 def test_basemodel_get_all(dbsession, testdata):  # pylint: disable=unused-argument,redefined-outer-name
     """
@@ -168,14 +184,13 @@ def test_basemodel_delete(dbsession, testdata):  # pylint: disable=unused-argume
     dmodel.delete()
     assert DummyModel.get_by_pk(testdata[1]) is None
 
-def test_basemodel_modified_at(dbsession):
+def test_basemodel_modified_at(dbsession):  # pylint: disable=unused-argument
     """
     On commit (or flush) models should have modified_at timestamp set.
     :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
     """
     dmodel = DummyModel(email='63ab@4852.8da7')
-    dmodel.save()
-    dbsession.commit()
+    dmodel.save(flush=True)
     # MySQL doesnt' support microseconds in datetime columns, but PostgreSQL does. Either way
     # comparing them won't work so remove.
     now = datetime.datetime.utcnow().replace(microsecond=0)
