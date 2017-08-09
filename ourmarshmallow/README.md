@@ -126,12 +126,13 @@ In [ourmarshmallow.schema](schema.py) the Schema is customized for more than jus
 * Add a custom validation to the `id` field to check for matching identifier values when the schema has an existing model instance (update/patch operations).
   * Raises a custom Exception `MismatchIdError` based on `marhsmallow_jsonapi.exceptions.IncorrectTypeError` so that servers can respond with a 409 Conflict in accordance with the JSONAPI spec.
 * Use a custom SCHEMA_OPTS class to customized the options for our schemas.
-  * Add a new `listable` option to our Schemas. When this is `True` then the `self_url_many` option for this schema is automatically set.
+  * Add a new `listable` option to our Schemas. When this is `True` then the api should allow for a GET method to return a list.
   * Always set `strict` option to `True` for our schemas. (Pending marshmallow-code/marshmallow#377 resolution.)
   * If the marshmallow-sqlalchmey `model` option for the schema is set then:
     * Set the `type_` option to the (dasherized) `model.__name__`.
     * Set `self_url` option to the `'/' + type_ + '/{id}'`.
     * Set `self_url_kwargs` option to `{'id': '<id>'}`.
-    * Set `self_url_many` to `'/' + type_` if `listable` is enabled for the schema.
+    * Set `self_url_many` to `'/' + type_`.
+      * This is used for creation of new models, in addition to potentially listing them if `listable` is `True`.
   * Sets the marshmallow-sqlalchemy `model_converter` option to use our customized ModelConverter.
   * Sets the marshmallow-jsonapi `inflect` option to use a dasherize function.
