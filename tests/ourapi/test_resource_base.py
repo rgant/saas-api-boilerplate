@@ -51,4 +51,5 @@ def test_new_resource():
         """ Base Resource for OkModelSchema end points. """
         schema = OkModelSchema
 
-    assert OkResource()
+    resource = OkResource()
+    assert resource.endpoint is None

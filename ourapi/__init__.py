@@ -7,3 +7,5 @@ try:
 except ImportError:
     import sys
     print("WARNING: Cannot Load builtins for py3 compatibility.", file=sys.stderr)
+
+from .resource_detail import ResourceDetail
