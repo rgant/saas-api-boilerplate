@@ -146,3 +146,21 @@ def test_detail_update_id_mismatch(dbsession):  # pylint: disable=unused-argumen
 
     assert excinfo.value.description == {'detail': 'Mismatched id. Expected "40".',
                                          'source': {'pointer': '/data/id'}}
+
+def test_detail_update_type_mismatch(dbsession):  # pylint: disable=unused-argument
+    """ Payload type and URL must match for patch/update """
+    the_model = Horses(id=50, name="Ordinary Know Scent Advice")
+    the_model.save()
+
+    test_app = flask.Flask(__name__)
+    resource = HorsesResourceDetail()
+
+    # id does not match the request url id
+    patch_data = {'data': {'attributes': {'name': 'bad request'},
+                           'id': '50', 'type': 'batteries'}}
+    with test_app.test_request_context(data=flask.json.dumps(patch_data)), \
+            pytest.raises(Conflict) as excinfo:
+        resource.patch(50)
+
+    assert excinfo.value.description == {'detail': 'Invalid type. Expected "horses".',
+                                         'source': {'pointer': '/data/type'}}
