@@ -15,14 +15,8 @@ import ourmarshmallow.exceptions
 
 warnings.simplefilter("error")  # Make All warnings errors while testing.
 
-def test_missing_id_error():
-    """ Confirm defaults for MissingIdError. """
-    exc = ourmarshmallow.exceptions.MissingIdError()
-    exc.messages == {'errors': [{'detail': '`data` object must include `id` key.',
-                                 'source': {'pointer': '/data'}}]}
-
 def test_mismatch_id_error():
     """ Confirm defaults for MismatchIdError. """
     exc = ourmarshmallow.exceptions.MismatchIdError(actual='999', expected='100')
-    exc.messages == {'errors': [{'detail': 'Mismatched id. Expected "100".',
-                                 'source': {'pointer': '/data/id'}}]}
+    assert exc.messages == {'errors': [{'detail': 'Mismatched id. Expected "100".',
+                                        'source': {'pointer': '/data/id'}}]}

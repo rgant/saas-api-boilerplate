@@ -10,7 +10,7 @@ except ImportError:
 
 import flask
 
-from ourmarshmallow.exceptions import IncorrectTypeError, MissingIdError, MismatchIdError
+from ourmarshmallow.exceptions import IncorrectTypeError, MismatchIdError
 from . import exceptions
 from . import resource_base
 
@@ -69,7 +69,7 @@ class ResourceDetail(resource_base.Resource):
         try:
             # Passing existing model instance into load results in extra checks for id in data.
             schema.load(flask.request.get_json(force=True), instance=the_model)
-        except (IncorrectTypeError, MissingIdError, MismatchIdError) as exc:
+        except (IncorrectTypeError, MismatchIdError) as exc:
             # http://jsonapi.org/format/#crud-updating-responses-409
             raise exceptions.Conflict(exc.messages['errors'][0])
 

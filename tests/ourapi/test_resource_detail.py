@@ -12,6 +12,7 @@ import datetime
 import warnings
 
 import flask
+import marshmallow
 import pytest
 import sqlalchemy as sa
 
@@ -123,11 +124,12 @@ def test_detail_update_id_required(dbsession):  # pylint: disable=unused-argumen
     # id is missing, but it is required: http://jsonapi.org/format/#crud-updating
     patch_data = {'data': {'attributes': {'name': 'bad request'}, 'type': 'horses'}}
     with test_app.test_request_context(data=flask.json.dumps(patch_data)), \
-            pytest.raises(Conflict) as excinfo:
+            pytest.raises(marshmallow.ValidationError) as excinfo:
+            # This will be turned into a BadRequest by the error handler in the API.
         resource.patch(30)
 
-    assert excinfo.value.description == {'detail': '`data` object must include `id` key.',
-                                         'source': {'pointer': '/data'}}
+    assert excinfo.value.messages == {'errors': [{'detail': '`data` object must include `id` key.',
+                                                  'source': {'pointer': '/data'}}]}
 
 def test_detail_update_id_mismatch(dbsession):  # pylint: disable=unused-argument
     """ Payload id and URL id must match for patch/update """
@@ -147,7 +149,7 @@ def test_detail_update_id_mismatch(dbsession):  # pylint: disable=unused-argumen
     assert excinfo.value.description == {'detail': 'Mismatched id. Expected "40".',
                                          'source': {'pointer': '/data/id'}}
 
-def test_detail_update_type_mismatch(dbsession):  # pylint: disable=unused-argument
+def test_detail_update_type_mismatch(dbsession):  # pylint: disable=unused-argument,invalid-name
     """ Payload type and URL must match for patch/update """
     the_model = Horses(id=50, name="Ordinary Know Scent Advice")
     the_model.save()

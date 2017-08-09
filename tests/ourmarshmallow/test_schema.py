@@ -11,6 +11,7 @@ except ImportError:
 import datetime
 import warnings
 
+import marshmallow
 import pytest
 import sqlalchemy as sa
 import sqlalchemy.orm as saorm
@@ -202,7 +203,7 @@ def test_instance_missing_id():
                      'attributes': {'email': '443d@4e0b.8eb1',
                                     'full-name': 'a72f6d46 fa4a23cc0750'}}}
     the_schema = FakeModelSchema()
-    with pytest.raises(ourmarshmallow.exceptions.MissingIdError):
+    with pytest.raises(marshmallow.ValidationError):
         the_schema.load(data, instance=the_model)
 
     assert the_model.email == 'cc66@44ab.994f'

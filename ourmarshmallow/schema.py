@@ -16,7 +16,7 @@ from common import utilities
 from models import db
 
 from .convert import ModelConverter
-from .exceptions import MissingIdError, MismatchIdError
+from .exceptions import MismatchIdError
 from .fields import MetaData
 
 
@@ -92,10 +92,17 @@ class Schema(marshmallow_jsonapi.Schema, marshmallow_sqlalchemy.ModelSchema):
     def unwrap_item(self, item):
         """
         If the schema has an existing instance the id field must be set.
-        :raises MissingIdError: id field isn't present when required.
+        :raises ValidationError: id field isn't present when required.
         """
         if self.instance and 'id' not in item:
-            raise MissingIdError()
+            raise ma.ValidationError([
+                {
+                    'detail': '`data` object must include `id` key.',
+                    'source': {
+                        'pointer': '/data'
+                    }
+                }
+            ])
 
         return super().unwrap_item(item)
 
