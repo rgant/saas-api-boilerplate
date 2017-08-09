@@ -8,6 +8,7 @@ except ImportError:
     import sys
     print("WARNING: Cannot Load builtins for py3 compatibility.", file=sys.stderr)
 
+import flask
 import flask.views
 
 from ourmarshmallow.exceptions import IncorrectTypeError, MismatchIdError
@@ -98,7 +99,7 @@ class JsonApiResource(flask.views.MethodView):
             # http://jsonapi.org/format/#crud-updating-responses-409
             raise exceptions.Conflict(exc.messages['errors'][0])
 
-        the_model.save()
+        the_model.save(flush=True)
         result, _ = schema.dump(the_model)
         return result
 
@@ -116,11 +117,19 @@ class JsonApiResource(flask.views.MethodView):
             # http://jsonapi.org/format/#crud-creating-responses-409
             raise exceptions.Conflict(exc.messages['errors'][0])
 
-        the_model.save()
+        if the_model.id is not None:
+            raise exceptions.Conflict({
+                'detail': '`data` object may not include `id` key.',
+                'source': {
+                    'pointer': '/data/id'
+                }
+            })
+
+        the_model.save(flush=True)
 
         result, _ = schema.dump(the_model)
         return result, 201, {'Location': flask.url_for(self.__class__.__name__,
-                                                       the_id=the_model.id)}
+                                                       model_id=the_model.id)}
 
     @classmethod
     def register(cls, api):

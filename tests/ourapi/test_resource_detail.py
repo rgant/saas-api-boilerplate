@@ -80,7 +80,7 @@ def test_detail_update(dbsession):  # pylint: disable=unused-argument
     expected = {'data': {'attributes': {'name': 'fizzbuzz'},
                          'id': '20',
                          'links': {'self': '/horses/20'},
-                         'meta': {'modified_at': '2017-08-07T18:42:49+00:00'},
+                         'meta': {'modified_at': 'Automatically generated, will be replaced.'},
                          'type': 'horses'},
                 'links': {'self': '/horses/20'}}
 
@@ -88,12 +88,11 @@ def test_detail_update(dbsession):  # pylint: disable=unused-argument
     patch_data = {'data': {'attributes': {'name': 'fizzbuzz'}, 'id': '20', 'type': 'horses'}}
     resource = HorsesResource()
     response = resource.patch(20, patch_data)
-    # There is a flaw here because the session hasn't been commited when the response is sent.
+    # Correct the timestamp, which we will assume is correct
+    expected['data']['meta']['modified_at'] = response['data']['meta']['modified_at']
     assert response == expected
 
     response = resource.get(20)
-    # Correct the timestamp, which we will assume is correct
-    expected['data']['meta']['modified_at'] = response['data']['meta']['modified_at']
     assert response == expected
 
 def test_detail_update_not_found(dbsession):  # pylint: disable=unused-argument
