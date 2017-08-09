@@ -122,6 +122,9 @@ In [ourmarshmallow.schema](schema.py) the Schema is customized for more than jus
 * Re-define the `modified_at` DateTime column to use our customized MetaData field type.
   * Ideally all read only columns would be JSONAPI metadata but the hooks for this in the parent marshmallow_jsonapi.Schema aren't available for easy conversion using our ModelConverter.
 * On `Schema.__init__` set the marshmallow-sqlalchemy Schema session to the current session. This makes sure that whenever a Schema class is instantiated that we have the current SQLAlchemy session.
+* Add an extra check to `unwrap_item` that requires the `id` field when the schema has an existing model instance (update/patch operations).
+* Add a custom validation to the `id` field to check for matching identifier values when the schema has an existing model instance (update/patch operations).
+  * Raises a custom Exception `MismatchIdError` based on `marhsmallow_jsonapi.exceptions.IncorrectTypeError` so that servers can respond with a 409 Conflict in accordance with the JSONAPI spec.
 * Use a custom SCHEMA_OPTS class to customized the options for our schemas.
   * Add a new `listable` option to our Schemas. When this is `True` then the `self_url_many` option for this schema is automatically set.
   * Always set `strict` option to `True` for our schemas. (Pending marshmallow-code/marshmallow#377 resolution.)
