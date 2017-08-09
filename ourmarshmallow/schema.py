@@ -30,7 +30,7 @@ class SchemaOpts(marshmallow_jsonapi.SchemaOpts, marshmallow_sqlalchemy.ModelSch
         Sets up default self_url and kwargs if model option is set.
         Sets up default self_url_many if model and listable are truthy.
         """
-        # Does Resource support a list endpoint? Default False.
+        # Does Resource support a read list endpoint? Default False. Needed for Swagger.
         self.listable = getattr(meta, 'listable', False)
 
         # TODO: ROB 20170726 Check status of github.com/marshmallow-code/marshmallow/issues/377
@@ -48,10 +48,8 @@ class SchemaOpts(marshmallow_jsonapi.SchemaOpts, marshmallow_sqlalchemy.ModelSch
             # Self URLs are always based on the JSONAPI type and the model id
             meta.self_url = f'/{type_}/{{id}}'
             meta.self_url_kwargs = {'id': '<id>'}
-
-            # Only include the self_url_many if the Schema declares listable=True
-            if getattr(meta, 'listable', False):
-                meta.self_url_many = f'/{type_}'
+            # Always include the many url for resource creation at least
+            meta.self_url_many = f'/{type_}'
 
         # Use our custom ModelConverter to turn SQLAlchemy relations into JSONAPI Relationships.
         meta.model_converter = ModelConverter

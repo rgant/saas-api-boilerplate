@@ -92,7 +92,9 @@ def test_schema_listable_default():
     """ By default the listable option should be False. """
     schema = FakeModelSchema()
     assert schema.opts.listable is False
-    assert schema.opts.self_url_many is None
+    # Always need this URL for creation of new resources even if listing isn't supported.
+    assert schema.opts.self_url_many == f'/{schema.opts.type_}'
+    assert schema.opts.self_url.startswith(schema.opts.self_url_many)
 
 def test_schema_self_url_many():
     """

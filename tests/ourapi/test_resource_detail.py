@@ -1,5 +1,6 @@
 """
-Tests for the API ResourceDetail class
+Tests for the API JsonApiResource class details endpoints with identifiers. Read, Update, and Delete
+all by identifier.
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 try:
@@ -11,7 +12,6 @@ except ImportError:
 import datetime
 import warnings
 
-import flask
 import marshmallow
 import pytest
 import sqlalchemy as sa
@@ -25,7 +25,7 @@ import ourmarshmallow
 warnings.simplefilter("error")  # Make All warnings errors while testing.
 
 class Horses(bases.BaseModel):
-    """ Model for testing ResourceDetail """
+    """ Model for testing JsonApiResource. """
     name = sa.Column(sa.String(50), nullable=False)
 
 
@@ -35,16 +35,15 @@ class HorsesSchema(ourmarshmallow.Schema):
         model = Horses
 
 
-class HorsesResourceDetail(ourapi.ResourceDetail):
-    """ JSONAPI RUD endpoints for HorsesSchema/Horses Model. """
+class HorsesResource(ourapi.JsonApiResource):
+    """ JSONAPI CRUD endpoints for HorsesSchema/Horses Model. """
     schema = HorsesSchema
 
 
 def test_new_detail_resource():
     """ Resource endpoint for Model details. """
-    resource = HorsesResourceDetail()
-    assert isinstance(resource, HorsesResourceDetail)
-    assert resource.endpoint == HorsesSchema.opts.self_url
+    resource = HorsesResource()
+    assert isinstance(resource, HorsesResource)
 
 def test_detail_read(dbsession):  # pylint: disable=unused-argument
     """ Create a resource, and then Read it """
@@ -52,7 +51,7 @@ def test_detail_read(dbsession):  # pylint: disable=unused-argument
     the_model = Horses(id=10, name="foo bar baz", modified_at=now)
     the_model.save()
 
-    resource = HorsesResourceDetail()
+    resource = HorsesResource()
     response = resource.get(10)
 
     assert response == {'data': {'attributes': {'name': 'foo bar baz'},
@@ -64,7 +63,7 @@ def test_detail_read(dbsession):  # pylint: disable=unused-argument
 
 def test_detail_read_not_found(dbsession):  # pylint: disable=unused-argument
     """ Resource Detail Read raises NotFound when id isn't found. """
-    resource = HorsesResourceDetail()
+    resource = HorsesResource()
 
     with pytest.raises(NotFound) as excinfo:
         resource.get(999)
@@ -78,9 +77,6 @@ def test_detail_update(dbsession):  # pylint: disable=unused-argument
     the_model = Horses(id=20, name="qux corge", modified_at=now)
     the_model.save()
 
-    test_app = flask.Flask(__name__)
-    resource = HorsesResourceDetail()
-
     expected = {'data': {'attributes': {'name': 'fizzbuzz'},
                          'id': '20',
                          'links': {'self': '/horses/20'},
@@ -90,8 +86,8 @@ def test_detail_update(dbsession):  # pylint: disable=unused-argument
 
     # id is required for patch
     patch_data = {'data': {'attributes': {'name': 'fizzbuzz'}, 'id': '20', 'type': 'horses'}}
-    with test_app.test_request_context(data=flask.json.dumps(patch_data)):
-        response = resource.patch(20)
+    resource = HorsesResource()
+    response = resource.patch(20, patch_data)
     # There is a flaw here because the session hasn't been commited when the response is sent.
     assert response == expected
 
@@ -102,13 +98,10 @@ def test_detail_update(dbsession):  # pylint: disable=unused-argument
 
 def test_detail_update_not_found(dbsession):  # pylint: disable=unused-argument
     """ Resource detail Update raises NotFound when id. """
-    test_app = flask.Flask(__name__)
-    resource = HorsesResourceDetail()
-
     patch_data = {'data': {'attributes': {'name': 'bad request'}, 'type': 'horses'}}
-    with test_app.test_request_context(data=flask.json.dumps(patch_data)), \
-            pytest.raises(NotFound) as excinfo:
-        resource.patch(999)
+    resource = HorsesResource()
+    with pytest.raises(NotFound) as excinfo:
+        resource.patch(999, patch_data)
 
     assert excinfo.value.description == {'detail': '999 not found.',
                                          'source': {'parameter': '/id'}}
@@ -118,15 +111,12 @@ def test_detail_update_id_required(dbsession):  # pylint: disable=unused-argumen
     the_model = Horses(id=30, name="Time Coin Instant Understand")
     the_model.save()
 
-    test_app = flask.Flask(__name__)
-    resource = HorsesResourceDetail()
-
     # id is missing, but it is required: http://jsonapi.org/format/#crud-updating
     patch_data = {'data': {'attributes': {'name': 'bad request'}, 'type': 'horses'}}
-    with test_app.test_request_context(data=flask.json.dumps(patch_data)), \
-            pytest.raises(marshmallow.ValidationError) as excinfo:
+    resource = HorsesResource()
+    with pytest.raises(marshmallow.ValidationError) as excinfo:
             # This will be turned into a BadRequest by the error handler in the API.
-        resource.patch(30)
+        resource.patch(30, patch_data)
 
     assert excinfo.value.messages == {'errors': [{'detail': '`data` object must include `id` key.',
                                                   'source': {'pointer': '/data'}}]}
@@ -136,15 +126,12 @@ def test_detail_update_id_mismatch(dbsession):  # pylint: disable=unused-argumen
     the_model = Horses(id=40, name="Madden Everything Wonder Pronunciation")
     the_model.save()
 
-    test_app = flask.Flask(__name__)
-    resource = HorsesResourceDetail()
-
     # id does not match the request url id
     patch_data = {'data': {'attributes': {'name': 'bad request'},
                            'id': '999', 'type': 'horses'}}
-    with test_app.test_request_context(data=flask.json.dumps(patch_data)), \
-            pytest.raises(Conflict) as excinfo:
-        resource.patch(40)
+    resource = HorsesResource()
+    with pytest.raises(Conflict) as excinfo:
+        resource.patch(40, patch_data)
 
     assert excinfo.value.description == {'detail': 'Mismatched id. Expected "40".',
                                          'source': {'pointer': '/data/id'}}
@@ -154,15 +141,12 @@ def test_detail_update_type_mismatch(dbsession):  # pylint: disable=unused-argum
     the_model = Horses(id=50, name="Ordinary Know Scent Advice")
     the_model.save()
 
-    test_app = flask.Flask(__name__)
-    resource = HorsesResourceDetail()
-
     # id does not match the request url id
     patch_data = {'data': {'attributes': {'name': 'bad request'},
                            'id': '50', 'type': 'batteries'}}
-    with test_app.test_request_context(data=flask.json.dumps(patch_data)), \
-            pytest.raises(Conflict) as excinfo:
-        resource.patch(50)
+    resource = HorsesResource()
+    with pytest.raises(Conflict) as excinfo:
+        resource.patch(50, patch_data)
 
     assert excinfo.value.description == {'detail': 'Invalid type. Expected "horses".',
                                          'source': {'pointer': '/data/type'}}

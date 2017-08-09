@@ -14,7 +14,7 @@ import pytest
 import sqlalchemy as sa
 
 from models import bases
-from ourapi import resource_base
+from ourapi import resource
 import ourmarshmallow
 
 
@@ -23,9 +23,9 @@ warnings.simplefilter("error")  # Make All warnings errors while testing.
 def test_required_schema():
     """ Resources must have a schema. """
     with pytest.raises(NotImplementedError):
-        resource_base.Resource()
+        resource.JsonApiResource()
 
-    class BadResource(resource_base.Resource):
+    class BadResource(resource.JsonApiResource):
         """ Missing the schema parameter """
         pass
 
@@ -47,9 +47,9 @@ def test_new_resource():
             model = OkModel
 
 
-    class OkResource(resource_base.Resource):
-        """ Base Resource for OkModelSchema end points. """
+    class OkResource(resource.JsonApiResource):
+        """ JSONAPI Resource for OkModelSchema end points. """
         schema = OkModelSchema
 
-    resource = OkResource()
-    assert resource.endpoint is None
+    jsapi_resource = OkResource()
+    assert isinstance(jsapi_resource, resource.JsonApiResource)

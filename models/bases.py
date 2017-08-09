@@ -91,6 +91,15 @@ class BaseModel(Base):
         logger.info('Deleted %r', self)
 
     @classmethod
+    def get_all(cls):
+        """
+        Lookup all of the records in the table.
+        :return list(BaseModel): Collection of subclass of BaseModel or []
+        """
+        session = db.connect()  # Scoped Session for models.
+        return session.query(cls).all()
+
+    @classmethod
     def get_by_pk(cls, the_id):
         """
         Lookup record in the table by Primary Key.
