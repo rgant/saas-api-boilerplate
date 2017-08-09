@@ -58,6 +58,7 @@ def test_relationship_kwargs():
     assert kwargs['schema'] == 'NodesSchema'
     assert kwargs['many'] is False
     assert kwargs['type_'] == 'nodes'
+    assert kwargs['attribute'] == 'parent'
     assert kwargs['relationship_name'] == 'parent'
     assert kwargs['parent_self_url'] == NodesSchema.opts.self_url
     assert kwargs['self_url_kwargs'] == NodesSchema.opts.self_url_kwargs
@@ -70,6 +71,7 @@ def test_many_relationship_kwargs():
     assert kwargs['schema'] == 'NodesSchema'
     assert kwargs['many'] is True
     assert kwargs['type_'] == 'nodes'
+    assert kwargs['attribute'] == 'children'
     assert kwargs['relationship_name'] == 'children'
     assert kwargs['parent_self_url'] == NodesSchema.opts.self_url
     assert kwargs['self_url_kwargs'] == NodesSchema.opts.self_url_kwargs

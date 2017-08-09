@@ -82,8 +82,9 @@ In [ourmarshmallow.fields](fields.py) the Relationship class customizations:
 
 * `parent_self_url` is the `self_url` option for the schema containing the Relationship field.
   * Example: `ArticlesSchema.opts.self_url == '/articles/{id}'`
-* `relationship_name` is the attribute name for the relationship on Model.
+* `attribute` is always set to the name for the relationship on Model.
   * Example: `Articles.author`
+* `relationship_name` is the dasherized version of `attribute` for the relationship urls.
 
 These values, plus `self_url_kwargs` are set automatically by the converter when converting the model to a schema. When all three are set on initialization of the Relationship object then:
 
@@ -107,6 +108,7 @@ In [ourmarshmallow.convert](convert.py) the ModelConverter class customizations:
     * This is necessary because we broke the `DIRECTION_MAPPING` attribute and it's how the super() code already checks things.
   * `Relationship(type_)` parameter is set to the (dasherized) version of `model.__name__`.
     * Example: `camel_to_kebab_case(CamelCase.__name__) == 'camel-case'`
+  * `Relationship(attribute)` parameter is set to the attribute name for the SQLAlchemy relation.
   * `Relationship(relationship_name)` parameter is set to the (dasherized) version of the attribute name for the SQLAlchemy relation.
     * Example: `kwargs['relationship_name'] == dasherize(Comments.author.prop.key)`
   * `Relationship(parent_self_url)` parameter is set to the `self_url` of the `schema_cls` for the converter.
