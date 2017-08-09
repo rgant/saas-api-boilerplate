@@ -8,7 +8,6 @@ except ImportError:
     import sys
     print("WARNING: Cannot Load builtins for py3 compatibility.", file=sys.stderr)
 
-import flask
 import flask.views
 
 from ourmarshmallow.exceptions import IncorrectTypeError, MismatchIdError
@@ -18,7 +17,6 @@ from . import exceptions
 class JsonApiResource(flask.views.MethodView):
     """ Flask MethodView for RESTful API end points using a marshmallow-jsonapi schema. """
     schema = None
-    routes = []
 
     def __new__(cls):
         # Inheriting classes must specify schema
@@ -142,8 +140,7 @@ class JsonApiResource(flask.views.MethodView):
         # Route for Model details by identifier (Read, Update, Delete by identifier)
         # kwargs conversion to flask with int converter. This is a bit ugly.
         # http://flask.pocoo.org/docs/0.12/api/#url-route-registrations
-        id_param = cls.schema.opts.self_url_kwargs['id'].replace('<', '<int:')
-        details_endpoint = cls.schema.opts.self_url.format(id=id_param)
+        details_endpoint = cls.schema.opts.self_url.format(id='<int:model_id>')
         api.add_url_rule(details_endpoint, view_func=view_func, methods=('DELETE', 'GET', 'PATCH'))
 
         # Route for Model Resource without identifier (Create, and possibly Read list)
