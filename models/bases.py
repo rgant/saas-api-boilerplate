@@ -91,13 +91,36 @@ class BaseModel(Base):
         logger.info('Deleted %r', self)
 
     @classmethod
-    def get_all(cls):
+    def _prepare_conditions(cls, conditions):
+        """
+        Convert a dict of conditions into a list of criterion for a SQL query
+        :param dict conditions: List of field names and values to filter a query on
+        :return list: filter criterion for a query
+        """
+        where = []
+        for k, v in conditions.items():
+            attr = getattr(cls, k)
+            if not isinstance(attr.prop, sa.orm.ColumnProperty):
+                raise AttributeError('Filtering not supported for relations %s' % k)
+            if isinstance(v, list):
+                if len(v) > 1:
+                    where.append(attr.in_(v))
+                    continue
+                else:
+                    v = v[0]
+            where.append(attr == v)
+        return where
+
+    @classmethod
+    def get_all(cls, conditions=None):
         """
         Lookup all of the records in the table.
+        :param dict or None conditions: filter conditions for SQL query
         :return list(BaseModel): Collection of subclass of BaseModel or []
         """
         session = db.connect()  # Scoped Session for models.
-        return session.query(cls).all()
+        criterion = cls._prepare_conditions(conditions or {})
+        return session.query(cls).filter(*criterion).all()
 
     @classmethod
     def get_by_pk(cls, the_id):

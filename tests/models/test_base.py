@@ -92,6 +92,34 @@ def test_basemodel_save(dbsession):  # pylint: disable=unused-argument
     assert dmodel.modified_at is None
     assert dmodel.email == '7cf0@496d.aa5e'
 
+def test_basemodel_get_all(dbsession, testdata):  # pylint: disable=unused-argument,redefined-outer-name
+    """
+    Default should return all of the records in the table.
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    :param list(int) testdata: pytest fixture listing DummyModel test data ids.
+    """
+    all_models = DummyModel.get_all()
+    assert len(all_models) == 2
+
+def test_basemodel_get_all_filter(dbsession, testdata):  # pylint: disable=unused-argument,redefined-outer-name
+    """
+    Filter records by conditions.
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    :param list(int) testdata: pytest fixture listing DummyModel test data ids.
+    """
+    all_models = DummyModel.get_all({'email': '90e1@47e7.aff7'})
+    assert len(all_models) == 1
+    assert all_models[0].email == '90e1@47e7.aff7'
+
+def test_basemodel_get_all_empty(dbsession, testdata):  # pylint: disable=unused-argument,redefined-outer-name
+    """
+    Conditions that cannot be met should return an empty list.
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    :param list(int) testdata: pytest fixture listing DummyModel test data ids.
+    """
+    all_models = DummyModel.get_all({'email': 'foo@bar.baz'})
+    assert all_models == []
+
 def test_basemodel_get_pk_blank(dbsession, testdata):  # pylint: disable=unused-argument,redefined-outer-name
     """
     Empty IDs should return None
