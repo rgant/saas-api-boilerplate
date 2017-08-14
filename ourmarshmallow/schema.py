@@ -87,6 +87,16 @@ class Schema(marshmallow_jsonapi.Schema, marshmallow_sqlalchemy.ModelSchema):
 
         super().__init__(*args, **kwargs)
 
+    @classmethod
+    def field_for(cls, field_name):
+        """
+        Get a marshmallow field object for an attribute of this schema.
+        :param str field_name: Name of attribute to return the marshmallow.fields for.
+        :return ourmarshmallow.fields.Field: Subclass of Field for attribute of schema class.
+        """
+        # _declared_fields is set by the metaclass marshmallow.schema.SchemaMeta
+        return cls._declared_fields[field_name]  # pylint: disable=no-member
+
     def unwrap_item(self, item):
         """
         If the schema has an existing instance the id field must be set.

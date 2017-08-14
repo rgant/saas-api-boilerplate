@@ -224,3 +224,9 @@ def test_instance_mismatched_id():
 
     assert the_model.email == '4271@4f2c.a021'
     assert the_model.full_name == 'a7fbacd4 4948b217d9b6'
+
+def test_field_for():
+    """ Schema should return a Field for attribute name. """
+    field = FakeModelSchema.field_for('full_name')
+    assert isinstance(field, ourmarshmallow.fields.Field)
+    # What about load_from? dump_to? etc? Ignore for now.

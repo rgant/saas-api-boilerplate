@@ -28,6 +28,7 @@ class Nodes(bases.BaseModel):
     parent = saorm.relationship('Nodes', back_populates='children', remote_side='Nodes.id')
     children = saorm.relationship('Nodes', back_populates='parent')
 
+
 class NodesSchema(ourmarshmallow.Schema):
     """ Schema for testing relationship conversion. """
     class Meta(object):  # pylint: disable=missing-docstring,too-few-public-methods
