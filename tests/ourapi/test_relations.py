@@ -38,12 +38,12 @@ class PersonsSchema(ourmarshmallow.Schema):
 
 
 class ParentRelation(ourapi.JsonApiRelation):
-    """ Endpoints for a Persons Relationship. """
+    """ Endpoints for a Persons Relation Models. """
     relation = PersonsSchema.field_for('parent')
 
 
 class ChildrenRelation(ourapi.JsonApiRelation):
-    """ Endpoints for a children Relationship. """
+    """ Endpoints for a children Relation Models. """
     relation = PersonsSchema.field_for('children')
 
 
@@ -70,7 +70,7 @@ def testdata(createdb):
 
 def test_read_none_relation(dbsession, testdata):  # pylint: disable=unused-argument,redefined-outer-name
     """
-    Read a list of resources.
+    To One Relations without a value should return None as primary data.
     :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
     :param list(str) testdata: pytest fixture listing test data tokens.
     """
@@ -82,7 +82,7 @@ def test_read_none_relation(dbsession, testdata):  # pylint: disable=unused-argu
 
 def test_read_to_one_relation(dbsession, testdata):  # pylint: disable=unused-argument,redefined-outer-name
     """
-    Read a list of resources.
+    Read a to one relation model.
     :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
     :param list(str) testdata: pytest fixture listing test data tokens.
     """
