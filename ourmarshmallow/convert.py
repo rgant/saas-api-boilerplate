@@ -53,3 +53,6 @@ class ModelConverter(marshmallow_sqlalchemy.ModelConverter):
         kwargs['parent_self_url'] = self.schema_cls.opts.self_url
         # Relationship URLs will use the same kwargs as the parent schema.
         kwargs['self_url_kwargs'] = self.schema_cls.opts.self_url_kwargs
+        # Store the model of the schema_cls so the relationship knows everything necessary for the
+        # endpoint.
+        kwargs['parent_model'] = self.schema_cls.opts.model

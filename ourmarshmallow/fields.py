@@ -45,14 +45,19 @@ class Relationship(marshmallow_jsonapi.fields.Relationship, marshmallow_sqlalche
     """
     Combine the marshmallow-jsonapi.fields.Relationship with marshmallow-sqlalchemy.fields.Related.
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self, parent_self_url='', relationship_name='', parent_model=None, **kwargs):
+        """
+        :param str parent_self_url: Used to calculate self_url and related_url from a parent schema.
+        :param str relationship_name: Name of this relationship for self_url and related_url.
+        :param models.bases.BaseModel parent_model: Model Class of Schema containing this field.
+        """
         # Calculate our relationship URLs beased on the parent schema's self_url
-        needed_fields = ('parent_self_url', 'relationship_name', 'self_url_kwargs')
-        if all(field in kwargs for field in needed_fields):
-            kwargs['self_url'] = '{0}/relationships/{1}'.format(kwargs['parent_self_url'],
-                                                                kwargs['relationship_name'])
-            kwargs['related_url'] = '{0}/{1}'.format(kwargs['parent_self_url'],
-                                                     kwargs['relationship_name'])
+        if parent_self_url and relationship_name and kwargs['self_url_kwargs']:
+            kwargs['self_url'] = '{0}/relationships/{1}'.format(parent_self_url, relationship_name)
+            kwargs['related_url'] = '{0}/{1}'.format(parent_self_url, relationship_name)
             kwargs['related_url_kwargs'] = kwargs['self_url_kwargs']
 
-        super().__init__(*args, **kwargs)
+        # Set the class of the model for the schema containing this field.
+        self.parent_model = parent_model
+
+        super().__init__(**kwargs)

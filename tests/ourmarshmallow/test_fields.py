@@ -49,3 +49,12 @@ def test_relationship_defaults():
     assert field.self_url == '/foo/bar/relationships/baz'
     assert field.related_url == '/foo/bar/baz'
     assert field.related_url_kwargs == {'quz': 'corge'}
+
+def test_relationship_parent_model():
+    """ Relationship should know it's parent model class. """
+    class AModel(object):  # pylint: disable=too-few-public-methods
+        """ Dummy model for testing. """
+        pass
+
+    field = ourmarshmallow.fields.Relationship(parent_model=AModel)
+    assert field.parent_model == AModel
