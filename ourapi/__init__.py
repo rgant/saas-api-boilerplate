@@ -10,3 +10,4 @@ except ImportError:
 
 from .resource import JsonApiResource
 from .relations import JsonApiRelation
+from .relationships import JsonApiRelationship
