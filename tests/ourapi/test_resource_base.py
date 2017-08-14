@@ -48,7 +48,7 @@ def test_new_resource():
 
 
     class OkResource(resource.JsonApiResource):
-        """ JSONAPI Resource for OkModelSchema end points. """
+        """ JSONAPI Resource for OkModelSchema endpoints. """
         schema = OkModelSchema
 
     jsapi_resource = OkResource()

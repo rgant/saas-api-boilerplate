@@ -1,5 +1,5 @@
 """
-Customized Flask for RESTful JSONAPI endpoints.
+Base class for JSONAPI Resources in our api.
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 try:
@@ -8,5 +8,9 @@ except ImportError:
     import sys
     print("WARNING: Cannot Load builtins for py3 compatibility.", file=sys.stderr)
 
-from .resource import JsonApiResource
-from .relations import JsonApiRelation
+import flask.views
+
+
+class BaseJsonApiResource(flask.views.MethodView):
+    """ Root class for all JSONAPI Method View Classes. """
+    pass

@@ -8,14 +8,15 @@ except ImportError:
     import sys
     print("WARNING: Cannot Load builtins for py3 compatibility.", file=sys.stderr)
 
-import flask.views
+import flask
 
 from ourmarshmallow.exceptions import IncorrectTypeError, MismatchIdError
+from . import base
 from . import exceptions
 
 
-class JsonApiResource(flask.views.MethodView):
-    """ Flask MethodView for RESTful API end points using a marshmallow-jsonapi schema. """
+class JsonApiResource(base.BaseJsonApiResource):
+    """ Flask MethodView for RESTful API endpoints using a marshmallow-jsonapi schema. """
     schema = None
 
     def __new__(cls):
