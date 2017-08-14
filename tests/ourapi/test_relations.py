@@ -99,3 +99,45 @@ def test_read_to_one_relation(dbsession, testdata):  # pylint: disable=unused-ar
                                                                         'self': '/persons/10/relationships/parent'}}},
                                  'type': 'persons'},
                         'links': {'self': '/persons/20/parent'}}
+
+def test_read_empty_list_relation(dbsession, testdata):  # pylint: disable=unused-argument,redefined-outer-name
+    """
+    To Many Relations without a value should return empty list as primary data.
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    :param list(str) testdata: pytest fixture listing test data tokens.
+    """
+    resource = ChildrenRelation()
+    response = resource.get(22)
+    # Just above this section is an example a related resource request returning nothing:
+    # http://jsonapi.org/format/#fetching-resources-responses-404
+    assert response == {'data': [], 'links': {'self': '/persons/22/children'}}
+
+def test_read_to_many_relation(dbsession, testdata):  # pylint: disable=unused-argument,redefined-outer-name
+    """
+    Read a to many relation models.
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    :param list(str) testdata: pytest fixture listing test data tokens.
+    """
+    resource = ChildrenRelation()
+    response = resource.get(20)
+    assert response == {'data': [{'attributes': {'name': 'Impossible Stand'},
+                                  'id': '21',
+                                  'links': {'self': '/persons/21'},
+                                  'meta': {'modified_at': '2017-08-14T17:50:19+00:00'},
+                                  # pylint: disable=line-too-long
+                                  'relationships': {'children': {'links': {'related': '/persons/21/children',
+                                                                           'self': '/persons/21/relationships/children'}},
+                                                    'parent': {'links': {'related': '/persons/21/parent',
+                                                                         'self': '/persons/21/relationships/parent'}}},
+                                  'type': 'persons'},
+                                 {'attributes': {'name': 'Carry Cool'},
+                                  'id': '22',
+                                  'links': {'self': '/persons/22'},
+                                  'meta': {'modified_at': '2017-08-14T17:50:19+00:00'},
+                                  # pylint: disable=line-too-long
+                                  'relationships': {'children': {'links': {'related': '/persons/22/children',
+                                                                           'self': '/persons/22/relationships/children'}},
+                                                    'parent': {'links': {'related': '/persons/22/parent',
+                                                                         'self': '/persons/22/relationships/parent'}}},
+                                  'type': 'persons'}],
+                        'links': {'self': '/persons/20/children'}}

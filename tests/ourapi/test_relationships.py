@@ -82,7 +82,7 @@ def test_read_none_relationship(dbsession, testdata):  # pylint: disable=unused-
     assert response == {'data': None, 'links': {'related': '/departments/10/parent',
                                                 'self': '/departments/10/relationships/parent'}}
 
-def test_read_to_one_relation(dbsession, testdata):  # pylint: disable=unused-argument,redefined-outer-name
+def test_read_to_one_relationship(dbsession, testdata):  # pylint: disable=unused-argument,redefined-outer-name
     """
     Read a to one relationship data.
     :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
@@ -90,7 +90,32 @@ def test_read_to_one_relation(dbsession, testdata):  # pylint: disable=unused-ar
     """
     resource = ParentRelationship()
     response = resource.get(20)
-    assert response == {'data': {'id': '10',
-                                 'type': 'departments'},
+    assert response == {'data': {'id': '10', 'type': 'departments'},
                         'links': {'related': '/departments/20/parent',
                                   'self': '/departments/20/relationships/parent'}}
+
+def test_read_empty_list_relationship(dbsession, testdata):  # pylint: disable=unused-argument,redefined-outer-name,invalid-name
+    """
+    To Many Relationships without a value should return empty list as primary data.
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    :param list(str) testdata: pytest fixture listing test data tokens.
+    """
+    resource = ChildrenRelationship()
+    response = resource.get(22)
+    # Just above this section is an example a related resource request returning nothing:
+    # http://jsonapi.org/format/#fetching-resources-responses-404
+    assert response == {'data': [], 'links': {'related': '/departments/22/children',
+                                              'self': '/departments/22/relationships/children'}}
+
+def test_read_to_many_relationship(dbsession, testdata):  # pylint: disable=unused-argument,redefined-outer-name
+    """
+    Read a to many relationships.
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    :param list(str) testdata: pytest fixture listing test data tokens.
+    """
+    resource = ChildrenRelationship()
+    response = resource.get(20)
+    assert response == {'data': [{'id': '21', 'type': 'departments'},
+                                 {'id': '22', 'type': 'departments'}],
+                        'links': {'related': '/departments/20/children',
+                                  'self': '/departments/20/relationships/children'}}

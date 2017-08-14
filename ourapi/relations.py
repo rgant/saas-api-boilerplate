@@ -45,7 +45,7 @@ class JsonApiRelation(base.BaseJsonApiResource):
                                        'source': {'parameter': '/relation'}})
 
         # the relation schema @property will magically return an instance of the Schema class.
-        result, _ = self.relation.schema.dump(related)
+        result, _ = self.relation.schema.dump(related, many=self.relation.many)
         # TODO: ROB 20170814 Is there a better way to get related resource top level self links?
         result.setdefault('links', {}).update(self=self.relation.get_related_url(the_model))
         return result
