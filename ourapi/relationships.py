@@ -39,11 +39,5 @@ class JsonApiRelationship(base.BaseJsonApiResource):
             raise exceptions.NotFound({'detail': '{id} not found.'.format(id=model_id),
                                        'source': {'parameter': '/id'}})
 
-        try:
-            result = self.relationship.serialize(self.relationship.attribute, the_model)
-        except AttributeError:
-            raise exceptions.NotFound({'detail': 'Relationship relation "{attribute}" not found.'\
-                                       .format(attribute=self.relationship.attribute),
-                                       'source': {'parameter': '/relation'}})
-
+        result = self.relationship.serialize(self.relationship.attribute, the_model)
         return result

@@ -16,6 +16,7 @@ import sqlalchemy as sa
 
 from models import bases
 import ourapi
+from ourapi.exceptions import NotFound
 import ourmarshmallow
 
 
@@ -141,3 +142,13 @@ def test_read_to_many_relation(dbsession, testdata):  # pylint: disable=unused-a
                                                                          'self': '/persons/22/relationships/parent'}}},
                                   'type': 'persons'}],
                         'links': {'self': '/persons/20/children'}}
+
+def test_model_missing_relation(dbsession, testdata):  # pylint: disable=unused-argument,redefined-outer-name
+    """
+    Model ID 999 doesn't exist so this should return a 404 Not Found exception.
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    :param list(str) testdata: pytest fixture listing test data tokens.
+    """
+    resource = ChildrenRelation()
+    with pytest.raises(NotFound):
+        resource.get(999)

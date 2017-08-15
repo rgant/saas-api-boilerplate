@@ -37,12 +37,7 @@ class JsonApiRelation(base.BaseJsonApiResource):
             raise exceptions.NotFound({'detail': '{id} not found.'.format(id=model_id),
                                        'source': {'parameter': '/id'}})
 
-        try:
-            related = getattr(the_model, self.relation.attribute)
-        except AttributeError:
-            raise exceptions.NotFound({'detail': 'Relation "{attribute}" not found.'\
-                                       .format(attribute=self.relation.attribute),
-                                       'source': {'parameter': '/relation'}})
+        related = getattr(the_model, self.relation.attribute)
 
         # the relation schema @property will magically return an instance of the Schema class.
         result, _ = self.relation.schema.dump(related, many=self.relation.many)
