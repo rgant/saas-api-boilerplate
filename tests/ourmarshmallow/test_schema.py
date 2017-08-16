@@ -63,7 +63,7 @@ def test_schema_session(dbsession):
     :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
     """
     schema = FakeModelSchema()
-    assert schema.session == dbsession
+    assert schema.session == dbsession.FACTORY
 
 def test_schema_type():
     """

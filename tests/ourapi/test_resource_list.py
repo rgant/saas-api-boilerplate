@@ -45,16 +45,16 @@ def testdata(createdb):
     Create the necessary test data for this module.
     :param models.db createdb: pytest fixture for database module
     """
-    dbsession = createdb.connect()
+    createdb.connect()
     now = datetime.datetime(2017, 8, 9, 14, 52, 36)
     data = ({'charge': 73.86805094257771, 'id': 10},
             {'charge': 72.00436375546976, 'id': 20},
             {'charge': 87.28642241669909, 'id': 30})
     for record in data:
         battery = Batteries(id=record['id'], charge=record['charge'], modified_at=now)
-        dbsession.add(battery)
+        createdb.add(battery)
 
-    dbsession.commit()
+    createdb.commit()
     createdb.close()
 
 def test_new_list_resource():

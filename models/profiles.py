@@ -31,8 +31,7 @@ class Profiles(bases.BaseModel):
         :param str email: email address to lookup
         :return Profiles: Matching Profile or None
         """
-        session = db.connect()  # Scoped Session for models.
-        return session.query(cls).filter(cls.email == email).one_or_none()
+        return db.query(cls).filter(cls.email == email).one_or_none()
 
     @saorm.validates('email')
     def validate_email(self, key, address):  # pylint: disable=unused-argument,no-self-use

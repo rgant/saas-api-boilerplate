@@ -55,7 +55,7 @@ def testdata(createdb):
     Create the necessary test data for this module.
     :param models.db createdb: pytest fixture for database module
     """
-    dbsession = createdb.connect()
+    createdb.connect()
     now = datetime.datetime(2017, 8, 14, 20, 26, 14)
     data = ({'id': 10, 'name': 'Extension Message', 'parent_id': None},
             {'id': 20, 'name': 'City Beat', 'parent_id': 10},
@@ -65,9 +65,9 @@ def testdata(createdb):
     for record in data:
         dept = Departments(id=record['id'], name=record['name'], parent_id=record['parent_id'],
                            modified_at=now)
-        dbsession.add(dept)
+        createdb.add(dept)
 
-    dbsession.commit()
+    createdb.commit()
     createdb.close()
 
 def test_read_none_relationship(dbsession, testdata):  # pylint: disable=unused-argument,redefined-outer-name

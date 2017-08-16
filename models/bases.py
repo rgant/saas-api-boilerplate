@@ -85,10 +85,7 @@ class BaseModel(Base):
 
     def delete(self):
         """ Delete this model in the session. Does not flush the session. """
-        logger = logging.getLogger(__name__)
-        session = db.connect()  # Scoped Session for models.
-        session.delete(self)
-        logger.info('Deleted %r', self)
+        db.delete(self)
 
     @classmethod
     def _prepare_conditions(cls, conditions):
@@ -118,9 +115,8 @@ class BaseModel(Base):
         :param dict or None conditions: filter conditions for SQL query
         :return list(BaseModel): Collection of subclass of BaseModel or []
         """
-        session = db.connect()  # Scoped Session for models.
         criterion = cls._prepare_conditions(conditions or {})
-        return session.query(cls).filter(*criterion).all()
+        return db.query(cls).filter(*criterion).all()
 
     @classmethod
     def get_by_pk(cls, the_id):
@@ -129,8 +125,7 @@ class BaseModel(Base):
         :param int the_id: Primary Key (id) to lookup
         :return BaseModel: Subclass of BaseModel or None
         """
-        session = db.connect()  # Scoped Session for models.
-        return session.query(cls).filter(cls.id == the_id).one_or_none()
+        return db.query(cls).filter(cls.id == the_id).one_or_none()
 
     def save(self, flush=False):
         """
@@ -138,8 +133,7 @@ class BaseModel(Base):
         :param bool flush: Also flush the session after adding model.
         """
         logger = logging.getLogger(__name__)
-        session = db.connect()  # Scoped Session for models.
-        session.add(self)
+        db.add(self)
         if flush:
-            session.flush() # Send INSERT/UPDATE to DB, but don't commit the transaction.
+            db.flush() # Send INSERT/UPDATE to DB, but don't commit the transaction.
         logger.info('Added %r', self)

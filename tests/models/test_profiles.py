@@ -25,16 +25,16 @@ def testdata(createdb):
     :param models.db createdb: pytest fixture for database module
     :return list(str): List of emails for Profiles created.
     """
-    dbsession = createdb.connect()
+    createdb.connect()
     emails = []
     data = ({'full_name': '4961e0b7 9acfd7e74533', 'email': '439b@47e7.ae97'},
             {'full_name': '315ab3db 535af6a5b009', 'email': '8d3d@4719.8278'})
     for record in data:
         profile = profiles.Profiles(full_name=record['full_name'], email=record['email'])
-        dbsession.add(profile)
+        createdb.add(profile)
         emails.append(profile.email)
 
-    dbsession.commit()
+    createdb.commit()
     createdb.close()
     return emails
 

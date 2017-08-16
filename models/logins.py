@@ -44,8 +44,7 @@ class Logins(bases.BaseModel):
         :param str email: email address to lookup
         :return Logins: Matching Login or None
         """
-        session = db.connect()  # Scoped Session for models.
-        return session.query(cls).filter(cls.email == email).one_or_none()
+        return db.query(cls).filter(cls.email == email).one_or_none()
 
     def is_valid_password(self, password):
         """

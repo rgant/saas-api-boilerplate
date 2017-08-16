@@ -37,16 +37,16 @@ def testdata(createdb):
     :param models.db createdb: pytest fixture for database module
     :return list(int): List of ids for DummyModel created.
     """
-    dbsession = createdb.connect()
+    createdb.connect()
     ids = []
     emails = ('9f1c@4dd6.b647', '90e1@47e7.aff7')
     for email in emails:
         dmodel = DummyModel(email=email)
-        dbsession.add(dmodel)
-        dbsession.flush()
+        createdb.add(dmodel)
+        createdb.flush()
         ids.append(dmodel.id)
 
-    dbsession.commit()
+    createdb.commit()
     createdb.close()
     return ids
 

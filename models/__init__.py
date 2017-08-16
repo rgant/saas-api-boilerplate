@@ -31,4 +31,7 @@ def __drop_tables():
     """ Drop the tables for our models. For testing only. """
     from . import db
     from . import bases
+    # Since this is only called by the tests this is an ok cleanup to prevent hangs closing out the
+    # tests.
+    db.FACTORY.close_all()  # pylint: disable=no-member
     bases.Base.metadata.drop_all(db.ENGINE)  # pylint: disable=no-member

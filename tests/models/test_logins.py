@@ -25,7 +25,7 @@ def testdata(createdb):
     :param models.db createdb: pytest fixture for database module
     :return list(str): List of emails for Logins created.
     """
-    dbsession = createdb.connect()
+    createdb.connect()
     emails = []
     data = ({'full_name': 'f4d94fd2 c10282e403d0', 'email': 'fca7@485d.b169',
              'password': '0c37f17b-4f89-4dce-a453-887b5acb9848'},
@@ -34,10 +34,10 @@ def testdata(createdb):
     for record in data:
         profile = profiles.Profiles(full_name=record['full_name'], email=record['email'])
         login = logins.Logins(password=record['password'], profile=profile)
-        dbsession.add(login)
+        createdb.add(login)
         emails.append(profile.email)
 
-    dbsession.commit()
+    createdb.commit()
     createdb.close()
     return emails
 

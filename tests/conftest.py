@@ -74,12 +74,12 @@ def dbsession(createdb):  # pylint: disable=redefined-outer-name
     :param createdb: pytest fixture to create the test tables and delete them when test is done.
     :yield sqlalchemy.orm.session.Session: sqlalchemy session for test
     """
-    session = createdb.connect()
+    createdb.connect()
 
-    yield session
+    yield createdb
 
     # This way we can get any database intergrety errors created in testing.
-    session.flush()
+    createdb.flush()
 
-    createdb.rollback()
+    # Will automatically rollback if not commited in test
     createdb.close()

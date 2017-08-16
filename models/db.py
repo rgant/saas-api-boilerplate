@@ -42,16 +42,25 @@ def _init():
 
 FACTORY = _init()
 
+def add(instance):
+    """
+    Place instance in session.
+    :param bases.BaseModel instance: to be inserted or updated on flush & commit
+    """
+    logger = logging.getLogger(__name__)
+    logger.debug('Add Instance: %r.', instance)
+    FACTORY.add(instance)  # pylint: disable=no-member
+
 def close():
     """ Dispose of the current session. """
     logger = logging.getLogger(__name__)
-    logger.debug('Remove Scoped Session.')
+    logger.debug('Remove Scoped Session: %r.', FACTORY)
     FACTORY.remove()
 
 def commit():
     """ Apply the current session to DB. This will populate the IDs and other defaults. """
     logger = logging.getLogger(__name__)
-    logger.debug('Commit Session.')
+    logger.debug('Commit Session: %r.', FACTORY)
     FACTORY.commit()  # pylint: disable=no-member
 
 def connect():
@@ -59,13 +68,38 @@ def connect():
     New/current session for context/thread.
     :retrun sqlalchemy.orm.session.Session: persistence operations for ORM-mapped objects
     """
-    session = FACTORY()
+    FACTORY()  # Initialize a static session for this context/thread.
     logger = logging.getLogger(__name__)
-    logger.debug('Return Scoped Session: %r.', session)
-    return session
+    logger.debug('Return Scoped Session: %r.', FACTORY)
+    return FACTORY
+
+def delete(instance):
+    """
+    Mark an instance as deleted.
+    :param bases.BaseModel instance: to be deleted on flush & commit
+    """
+    logger = logging.getLogger(__name__)
+    logger.debug('Delete Instance: %r.', instance)
+    FACTORY.delete(instance)  # pylint: disable=no-member
+
+def flush():
+    """ Flush all the object changes to the database. """
+    logger = logging.getLogger(__name__)
+    logger.debug('Flush Session: %r.', FACTORY)
+    FACTORY.flush()  # pylint: disable=no-member
+
+def query(entity):
+    """
+    Return a new Query object for this entity.
+    :param bases.BaseModel.__class__ entity: Models to query.
+    :return sqlalchemy.orm.query.Query: ORM-level SQL query object for SELECT statements.
+    """
+    logger = logging.getLogger(__name__)
+    logger.debug('Query Entity: %r.', entity)
+    return FACTORY.query(entity)  # pylint: disable=no-member
 
 def rollback():
     """ Rollback the current session from DB. """
     logger = logging.getLogger(__name__)
-    logger.debug('Rollback Session.')
+    logger.debug('Rollback Session: %r.', FACTORY)
     FACTORY.rollback()  # pylint: disable=no-member

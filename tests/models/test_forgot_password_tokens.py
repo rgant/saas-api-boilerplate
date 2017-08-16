@@ -28,7 +28,7 @@ def testdata(createdb):
     :param models.db createdb: pytest fixture for database module
     :return list(str): List of tokens for ForgotPasswordTokens created.
     """
-    dbsession = createdb.connect()
+    createdb.connect()
     tokens = []
     data = ({'full_name': 'df8df1a4 11162dcd40bb', 'email': 'c7fe@4a45.96d0',
              'password': '83b6143e-1a75-4e31-abcf-c081b0176c28'},
@@ -40,10 +40,10 @@ def testdata(createdb):
         profile = profiles.Profiles(full_name=record['full_name'], email=record['email'])
         login = logins.Logins(password=record['password'], profile=profile)
         token = fpt.ForgotPasswordTokens(login=login)
-        dbsession.add(token)
+        createdb.add(token)
         tokens.append(token.token)
 
-    dbsession.commit()
+    createdb.commit()
     createdb.close()
     return tokens
 

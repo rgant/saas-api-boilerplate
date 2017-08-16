@@ -58,5 +58,4 @@ class ForgotPasswordTokens(bases.BaseModel):
         :return ForgotPasswordTokens: Record matching token or None.
         """
         now = datetime.datetime.utcnow()
-        session = db.connect()  # Scoped Session for models.
-        return session.query(cls).filter(cls.token == token, cls.expiration_dt >= now).one_or_none()
+        return db.query(cls).filter(cls.token == token, cls.expiration_dt >= now).one_or_none()

@@ -28,7 +28,7 @@ def testdata(createdb):
     :param models.db createdb: pytest fixture for database module
     :return list(str): List of tokens for AuthenticationTokens created.
     """
-    dbsession = createdb.connect()
+    createdb.connect()
     tokens = []
     data = ({'full_name': '24c6e6a4 960f1df1d6ac', 'email': '7d26@4f1b.a38e',
              'password': 'be4b80d3-a6f2-442e-b495-2161376423ab'},
@@ -40,10 +40,10 @@ def testdata(createdb):
         profile = profiles.Profiles(full_name=record['full_name'], email=record['email'])
         login = logins.Logins(password=record['password'], profile=profile)
         token = autht.AuthenticationTokens(login=login)
-        dbsession.add(token)
+        createdb.add(token)
         tokens.append(token.token)
 
-    dbsession.commit()
+    createdb.commit()
     createdb.close()
     return tokens
 
