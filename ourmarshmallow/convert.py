@@ -35,7 +35,7 @@ class ModelConverter(marshmallow_sqlalchemy.ModelConverter):
 
     def _add_relationship_kwargs(self, kwargs, prop):
         """ Customize the kwargs for Relationship field based on prop. """
-        super()._add_relationship_kwargs(kwargs, prop)
+        # super()._add_relationship_kwargs(kwargs, prop)
 
         # All Schema names should be based on Model name.
         kwargs['schema'] = prop.mapper.class_.__name__ + 'Schema'

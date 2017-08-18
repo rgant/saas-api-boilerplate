@@ -31,6 +31,7 @@ class JsonApiRelation(base.BaseJsonApiResource):
         :param int model_id: Id of parent model to get relation of.
         :return dict: Either a single BaseModel for "to one" relations, or a collection for
                       "to many".
+        :raises exceptions.NotFound: JSONAPI Error Object for missing id.
         """
         the_model = self.relation.parent_model.get_by_pk(model_id)
         if the_model is None:

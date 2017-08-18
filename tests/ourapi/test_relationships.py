@@ -11,12 +11,13 @@ except ImportError:
 import datetime
 import warnings
 
+import marshmallow
 import pytest
 import sqlalchemy as sa
 
 from models import bases
 import ourapi
-from ourapi.exceptions import NotFound
+from ourapi.exceptions import Conflict, NotFound
 import ourmarshmallow
 
 
@@ -130,3 +131,77 @@ def test_model_missing_relationship(dbsession, testdata):  # pylint: disable=unu
     resource = ChildrenRelationship()
     with pytest.raises(NotFound):
         resource.get(999)
+
+def test_update_to_one_relationship(dbsession, testdata):  # pylint: disable=unused-argument,redefined-outer-name
+    """
+    Change the parent relationship to a new Department.
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    :param list(str) testdata: pytest fixture listing test data tokens.
+    """
+    resource = ParentRelationship()
+    response = resource.get(21)
+    assert response == {'data': {'id': '20', 'type': 'departments'},
+                        'links': {'related': '/departments/21/parent',
+                                  'self': '/departments/21/relationships/parent'}}
+
+    # Change parent from 20 to 10
+    patch_data = {'data': {'id': '10', 'type': 'departments'}}
+    response, code = resource.patch(21, patch_data)
+    assert response is None
+    assert code == 204
+
+    response = resource.get(21)
+    assert response == {'data': {'id': '10', 'type': 'departments'},
+                        'links': {'related': '/departments/21/parent',
+                                  'self': '/departments/21/relationships/parent'}}
+
+def test_update_to_none_relationship(dbsession, testdata):  # pylint: disable=unused-argument,redefined-outer-name,invalid-name
+    """
+    Remove the parent relationship of a Department.
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    :param list(str) testdata: pytest fixture listing test data tokens.
+    """
+    resource = ParentRelationship()
+    response = resource.get(20)
+    assert response == {'data': {'id': '10', 'type': 'departments'},
+                        'links': {'related': '/departments/20/parent',
+                                  'self': '/departments/20/relationships/parent'}}
+
+    # Change parent from 10 to None
+    patch_data = {'data': None}
+    response, code = resource.patch(20, patch_data)
+    assert response is None
+    assert code == 204
+
+    response = resource.get(20)
+    assert response == {'data': None,
+                        'links': {'related': '/departments/20/parent',
+                                  'self': '/departments/20/relationships/parent'}}
+
+def test_update_one_type_mismatch_relationship(dbsession, testdata):  # pylint: disable=unused-argument,redefined-outer-name,invalid-name
+    """
+    Raise a Conflict exception when the relationship type doesn't match schema for relationship.
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    :param list(str) testdata: pytest fixture listing test data tokens.
+    """
+    resource = ParentRelationship()
+
+    patch_data = {'data': {'id': '10', 'type': 'bad-type'}}
+    with pytest.raises(Conflict):
+        resource.patch(22, patch_data)
+
+def test_update_one_id_missing_relationship(dbsession, testdata):  # pylint: disable=unused-argument,redefined-outer-name,invalid-name
+    """
+    Id is a required field in a relationship object.
+    :param sqlalchemy.orm.session.Session dbsession: pytest fixture for database session
+    :param list(str) testdata: pytest fixture listing test data tokens.
+    """
+    resource = ParentRelationship()
+
+    patch_data = {'data': {'type': 'departments'}}
+    with pytest.raises(marshmallow.ValidationError) as excinfo:
+        # This will be turned into a BadRequest by the error handler in the API.
+        resource.patch(10, patch_data)
+
+    assert excinfo.value.messages == {'errors': [{'detail': '`data` object must include `id` key.',
+                                                  'source': {'pointer': '/data'}}]}

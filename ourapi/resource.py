@@ -10,7 +10,7 @@ except ImportError:
 
 import flask
 
-from ourmarshmallow.exceptions import IncorrectTypeError, MismatchIdError
+from ourmarshmallow.exceptions import ForbiddenIdError, IncorrectTypeError, MismatchIdError
 from . import base
 from . import exceptions
 
@@ -109,20 +109,18 @@ class JsonApiResource(base.BaseJsonApiResource):
         :return tuple(dict, int, dict): New Model Schema dump, 201, Location: URL for Model endpoint
         """
         schema = self.schema()  # pylint: disable=not-callable
+        schema.load_existing = False
 
         try:
             the_model, _ = schema.load(data)
+        except ForbiddenIdError as exc:
+            # A server MUST return 403 Forbidden in response to an unsupported request to create a
+            # resource with a client-generated ID.
+            # http://jsonapi.org/format/#crud-creating-client-ids
+            raise exceptions.Forbidden(exc.messages['errors'][0])
         except IncorrectTypeError as exc:
             # http://jsonapi.org/format/#crud-creating-responses-409
             raise exceptions.Conflict(exc.messages['errors'][0])
-
-        if the_model.id is not None:
-            raise exceptions.Conflict({
-                'detail': '`data` object may not include `id` key.',
-                'source': {
-                    'pointer': '/data/id'
-                }
-            })
 
         the_model.save(flush=True)
 

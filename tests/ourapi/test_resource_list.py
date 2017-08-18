@@ -17,7 +17,7 @@ import sqlalchemy as sa
 
 from models import bases
 import ourapi
-from ourapi.exceptions import Conflict
+from ourapi.exceptions import Forbidden
 import ourmarshmallow
 
 
@@ -132,8 +132,8 @@ def test_create_id_conflict(dbsession):  # pylint: disable=unused-argument
     resource = BatteriesResource()
     post_data = {'data': {'attributes': {'charge': 67.88553490220708}, 'type': 'batteries',
                           'id': '50'}}
-    with pytest.raises(Conflict) as excinfo:
+    with pytest.raises(Forbidden) as excinfo:
         resource.post(post_data)
 
-    assert excinfo.value.description == {'detail': '`data` object may not include `id` key.',
+    assert excinfo.value.description == {'detail': '`data` object must not include `id` key.',
                                          'source': {'pointer': '/data/id'}}
