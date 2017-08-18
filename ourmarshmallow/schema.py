@@ -16,7 +16,7 @@ from common import utilities
 from models import db
 
 from .convert import ModelConverter
-from .exceptions import MismatchIdError
+from .exceptions import ForbiddenIdError, MismatchIdError, NullPrimaryData
 from .fields import MetaData
 
 
@@ -81,6 +81,9 @@ class Schema(marshmallow_jsonapi.Schema, marshmallow_sqlalchemy.ModelSchema):
         Combine the inits for marshmallow_jsonapi.Schema, marshmallow_sqlalchemy.ModelSchema.
         Forces session=db.connect().
         """
+        # control if unwrap_item checks for the id field in the object.
+        self.load_existing = True
+
         # Each instance of the schema should have the current session with the DB
         # (marshmallow-sqlschema). This must be done on instance init, not on class creation!
         kwargs['session'] = db.connect()
@@ -97,22 +100,70 @@ class Schema(marshmallow_jsonapi.Schema, marshmallow_sqlalchemy.ModelSchema):
         # _declared_fields is set by the metaclass marshmallow.schema.SchemaMeta
         return cls._declared_fields[field_name]  # pylint: disable=no-member
 
+    def format_error(self, field_name, message, index=None):
+        """ Correct pointer for id field_name. """
+        ret = super().format_error(field_name, message, index)
+        if field_name == 'id':
+            ret['source']['pointer'] = ret['source']['pointer'].replace('attributes/', '')
+        return ret
+
+    @ma.post_load(pass_many=True)
+    def make_instance(self, data, many):  # pylint: disable=arguments-differ
+        """
+        Deserialize data to instances of the model. Update an existing if specified in
+        `self.instance` or loaded by primary key(s) in the data; else create a new model.
+        :param data: Data to deserialize.
+        :param many: Does data represent many models.
+        :return models.BaseModel or list(models.BaseModel): Instance(s) of model(s) updated with
+                                                            data.
+        """
+        if many:
+            return [super().make_instance(each) for each in data]
+        return super().make_instance(data)
+
     def unwrap_item(self, item):
         """
         If the schema has an existing instance the id field must be set.
         :raises ValidationError: id field isn't present when required.
         """
-        if self.instance and 'id' not in item:
-            raise ma.ValidationError([
-                {
-                    'detail': '`data` object must include `id` key.',
-                    'source': {
-                        'pointer': '/data'
-                    }
-                }
-            ])
+        id_in_item = 'id' in item
+        if self.load_existing and not id_in_item:
+            # Updating Resources must include type and id keys
+            # http://jsonapi.org/format/1.1/#crud-updating
+            raise ma.ValidationError([{'detail': '`data` object must include `id` key.',
+                                       'source': {'pointer': '/data'}}])
+
+        if not self.load_existing and id_in_item:
+            # Don't support client side identifier generation at this time.
+            raise ForbiddenIdError()
 
         return super().unwrap_item(item)
+
+    @ma.pre_load(pass_many=True)
+    def unwrap_request(self, data, many):
+        if 'data' not in data:
+            raise ma.ValidationError('Object must include `data` key.')
+
+        data = data['data']
+        data_is_collection = ma.utils.is_collection(data)
+        if many:
+            if not data_is_collection:
+                raise ma.ValidationError([{'detail': '`data` object must be a collection.',
+                                           'source': {'pointer': '/data'}}])
+
+            return [self.unwrap_item(each) for each in data]
+
+        if data_is_collection:
+            raise ma.ValidationError([
+                {'detail': '`data` object must be an object, not a collection.',
+                 'source': {'pointer': '/data'}}])
+
+        if data is None:
+            # When updating relationships we need to specially handle the primary data being null.
+            # http://jsonapi.org/format/1.1/#crud-updating-to-one-relationships
+            raise NullPrimaryData()
+
+        return self.unwrap_item(data)
 
     @ma.validates('id')
     def validate_id(self, value):

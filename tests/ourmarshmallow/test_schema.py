@@ -172,17 +172,28 @@ def test_schema_load(dbsession):  # pylint: disable=unused-argument
     assert the_model.full_name == data['data']['attributes']['full-name']
     assert the_model.modified_at is None  # Meta values aren't loaded into the model.
 
-def test_schema_load_without_id():
-    """ id isn't required on load. """
+def test_schema_load_creation_mode():
+    """ id isn't required when creating new models. """
     data = {'data': {'type': 'fake-model',
                      'attributes': {'email': '0a97@4e42.994d',
                                     'full-name': '8e8ac2d1 2e7904048885'}}}
     the_schema = FakeModelSchema()
+    the_schema.load_existing = False # Creation mode
     the_model = the_schema.load(data).data
     assert isinstance(the_model, FakeModel)
     assert the_model.id is None
     assert the_model.email == data['data']['attributes']['email']
     assert the_model.full_name == data['data']['attributes']['full-name']
+
+def test_schema_creation_id():
+    """ id is forbidden when creating new models. """
+    data = {'data': {'type': 'fake-model', 'id': '999',
+                     'attributes': {'email': '0a97@4e42.994d',
+                                    'full-name': '8e8ac2d1 2e7904048885'}}}
+    the_schema = FakeModelSchema()
+    the_schema.load_existing = False # Creation mode
+    with pytest.raises(ourmarshmallow.exceptions.ForbiddenIdError):
+        the_schema.load(data)
 
 def test_instance_requires_id():
     """ When loading schemas into an existing instance the id must exist. """
@@ -230,3 +241,22 @@ def test_field_for():
     field = FakeModelSchema.field_for('full_name')
     assert isinstance(field, ourmarshmallow.fields.Field)
     # What about load_from? dump_to? etc? Ignore for now.
+
+def test_format_error():
+    """
+    Special case handling of id field errors until pull request is merged.
+    https://github.com/marshmallow-code/marshmallow-jsonapi/pull/90
+    """
+    # TODO: ROB 2017-08-17 Check marshmallow-jsonapi for fix to id error formatting.
+    the_schema = FakeModelSchema()
+    error = the_schema.format_error('email', 'this is an attribute field error')
+    assert error['source']['pointer'] == '/data/attributes/email'
+
+    error = the_schema.format_error('id', 'this is a root field error')
+    assert error['source']['pointer'] == '/data/id'
+
+    error = the_schema.format_error('email', 'this is an attribute field error', 1)
+    assert error['source']['pointer'] == '/data/1/attributes/email'
+
+    error = the_schema.format_error('id', 'this is a root field error', 1)
+    assert error['source']['pointer'] == '/data/1/id'
