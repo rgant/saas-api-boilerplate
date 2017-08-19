@@ -85,6 +85,7 @@ In [ourmarshmallow.fields](fields.py) the Relationship class customizations:
 * `attribute` is always set to the name for the relationship on Model.
   * Example: `Articles.author`
 * `relationship_name` is the dasherized version of `attribute` for the relationship urls.
+* `parent_model` is the Model of the schema with the relationship. So we have everything necessary to respond on endpoints for this relation in this field. This could be the marshmallow_sqlalchemy.fields.Relation.model property, but that only works if the Schema is instantiated. It also conflicts with the marshmallow_jsonapi.fields.Relationship.schema property.
 
 These values, plus `self_url_kwargs` are set automatically by the converter when converting the model to a schema. When all three are set on initialization of the Relationship object then:
 
@@ -115,6 +116,8 @@ In [ourmarshmallow.convert](convert.py) the ModelConverter class customizations:
     * Example: `kwargs['parent_self_url'] = CommentsSchema.opts.self_url`
   * `Relationship(self_url_kwargs)` parameter is set to the `self_url_kwargs` of the `schema_cls` for the converter.
     * Example: `kwargs['self_url_kwargs'] = CommentsSchema.opts.self_url_kwargs`
+  * `Relationship(parent_model)` parameter is set to `self.schema_cls.opts.model` for the converter.
+    * Example: `kwargs['parent_model'] = CommentsSchema.opts.model`
 
 ### Customized Schema
 
