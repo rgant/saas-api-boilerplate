@@ -1,4 +1,4 @@
 ## TODOs in this Project
- * .//ourapi/relations.py:45:TODO: ROB 20170814 Is there a better way to get related resource top level self links?
+ * .//ourapi/relations.py:46:TODO: ROB 20170814 Is there a better way to get related resource top level self links?
  * .//ourmarshmallow/schema.py:36:TODO: ROB 20170726 Check status of github.com/marshmallow-code/marshmallow/issues/377
  * .//tests/ourmarshmallow/test_schema.py:250:TODO: ROB 2017-08-17 Check marshmallow-jsonapi for fix to id error formatting.

@@ -98,7 +98,9 @@ class Schema(marshmallow_jsonapi.Schema, marshmallow_sqlalchemy.ModelSchema):
         :return ourmarshmallow.fields.Field: Subclass of Field for attribute of schema class.
         """
         # _declared_fields is set by the metaclass marshmallow.schema.SchemaMeta
-        return cls._declared_fields[field_name]  # pylint: disable=no-member
+        ret = cls._declared_fields[field_name]  # pylint: disable=no-member
+        # ret._add_to_schema(field_name, cls)
+        return ret
 
     def format_error(self, field_name, message, index=None):
         """ Correct pointer for id field_name. """
