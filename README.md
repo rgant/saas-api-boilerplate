@@ -18,11 +18,13 @@ pyenv uses shim scripts to select the correct virtualenv for a file based on it'
 ```
 cd $PROJECT_DIR
 brew install pyenv pyenv-virtualenv
-pyenv install 3.6.1
-pyenv virtualenv 3.6.1 v$PROJECT_CODE
+CFLAGS="-I$(brew --prefix openssl)/include" LDFLAGS="-L$(brew --prefix openssl)/lib" pyenv install 3.6.3
+pyenv virtualenv 3.6.3 v$PROJECT_CODE
 pyenv local v$PROJECT_CODE
 pip install --upgrade pip setuptools
 ```
+
+Errors like `zipimport.ZipImportError: can't decompress data; zlib not available` can be resolved by installing xcode tools: `xcode-select --install`
 
 ### Requirements Files
 
