@@ -7,9 +7,9 @@ gunicorn==19.7.1
 itsdangerous==0.24
 Jinja2==2.10
 MarkupSafe==1.0
-marshmallow==2.13.5
-marshmallow-jsonapi==0.15.0
-marshmallow-sqlalchemy==0.13.1
+marshmallow==2.14.0
+marshmallow-jsonapi==0.16.0
+marshmallow-sqlalchemy==0.13.2
 psycopg2==2.7.3.2
 pycparser==2.18
 PyMySQL==0.7.11
