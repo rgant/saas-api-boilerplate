@@ -241,22 +241,3 @@ def test_field_for():
     field = FakeModelSchema.field_for('full_name')
     assert isinstance(field, ourmarshmallow.fields.Field)
     # What about load_from? dump_to? etc? Ignore for now.
-
-def test_format_error():
-    """
-    Special case handling of id field errors until pull request is merged.
-    https://github.com/marshmallow-code/marshmallow-jsonapi/pull/90
-    """
-    # TODO: ROB 2017-08-17 Check marshmallow-jsonapi for fix to id error formatting.
-    the_schema = FakeModelSchema()
-    error = the_schema.format_error('email', 'this is an attribute field error')
-    assert error['source']['pointer'] == '/data/attributes/email'
-
-    error = the_schema.format_error('id', 'this is a root field error')
-    assert error['source']['pointer'] == '/data/id'
-
-    error = the_schema.format_error('email', 'this is an attribute field error', 1)
-    assert error['source']['pointer'] == '/data/1/attributes/email'
-
-    error = the_schema.format_error('id', 'this is a root field error', 1)
-    assert error['source']['pointer'] == '/data/1/id'

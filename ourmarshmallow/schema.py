@@ -102,13 +102,6 @@ class Schema(marshmallow_jsonapi.Schema, marshmallow_sqlalchemy.ModelSchema):
         # ret._add_to_schema(field_name, cls)
         return ret
 
-    def format_error(self, field_name, message, index=None):
-        """ Correct pointer for id field_name. """
-        ret = super().format_error(field_name, message, index)
-        if field_name == 'id':
-            ret['source']['pointer'] = ret['source']['pointer'].replace('attributes/', '')
-        return ret
-
     @ma.post_load(pass_many=True)
     def make_instance(self, data, many):  # pylint: disable=arguments-differ
         """
