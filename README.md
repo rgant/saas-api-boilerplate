@@ -32,6 +32,20 @@ Errors like `zipimport.ZipImportError: can't decompress data; zlib not available
 
 Using `pipenv` the project and development dependencies are tracked in `Pipfile` and `Pipfile.lock`. The requirements files for pip have been migrated and moved.
 
+Since the Pipfile loses comments on each `pipenv install` this list documents the reason for certain dependencies:
+
+1. bcrypt # Password Hashing for Login
+2. # Flask-REST-JSONAPI # JSONAPI in Flask (seems abandoned or just slow to develop, we can do better.)
+3. Flask # Flask web server
+4. future # Python3 Compatibility (import builtins)
+5. gunicorn # Server for deployed app
+6. marshmallow-jsonapi # Handle the JSONAPI Envelope for API Schemas
+7. marshmallow-sqlalchemy # Map DB Models to API Schemas
+8. psycopg2 # PostgreSQL library
+9. PyMySQL # PDO for MySQL appropriate for Google Cloud SQL DB
+10. SQLAlchemy # ORM
+11. SQLAlchemy-Continuum # Audit log/versioning
+
 #### Install Requirements
 
 Install the same requirements as used on deploy: `pipenv install --dev`

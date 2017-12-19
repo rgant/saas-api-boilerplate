@@ -7,25 +7,15 @@ name = "pypi"
 
 [packages]
 
-bcrypt = "*"
-cffi = "*"
-click = "*"
-Flask = "*"
+flask = "*"
 future = "*"
 gunicorn = "*"
-itsdangerous = "*"
-"Jinja2" = "*"
-MarkupSafe = "*"
-marshmallow = "*"
 marshmallow-jsonapi = "*"
 marshmallow-sqlalchemy = "*"
 "psycopg2" = "*"
-pycparser = "*"
-PyMySQL = "*"
-SQLAlchemy = "*"
-SQLAlchemy-Continuum = "*"
-SQLAlchemy-Utils = "*"
-Werkzeug = "*"
+pymysql = "*"
+sqlalchemy = "*"
+sqlalchemy-continuum = "*"
 
 
 [dev-packages]
