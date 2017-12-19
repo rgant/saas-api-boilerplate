@@ -35,7 +35,7 @@ Using `pipenv` the project and development dependencies are tracked in `Pipfile`
 Since the Pipfile loses comments on each `pipenv install` this list documents the reason for certain dependencies:
 
 1. bcrypt # Password Hashing for Login
-2. # Flask-REST-JSONAPI # JSONAPI in Flask (seems abandoned or just slow to develop, we can do better.)
+2. \# Flask-REST-JSONAPI # JSONAPI in Flask (seems abandoned or just slow to develop, we can do better.)
 3. Flask # Flask web server
 4. future # Python3 Compatibility (import builtins)
 5. gunicorn # Server for deployed app
