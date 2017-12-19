@@ -1,0 +1,40 @@
+[[source]]
+
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+
+[packages]
+
+bcrypt = "*"
+cffi = "*"
+click = "*"
+Flask = "*"
+future = "*"
+gunicorn = "*"
+itsdangerous = "*"
+"Jinja2" = "*"
+MarkupSafe = "*"
+marshmallow = "*"
+marshmallow-jsonapi = "*"
+marshmallow-sqlalchemy = "*"
+"psycopg2" = "*"
+pycparser = "*"
+PyMySQL = "*"
+SQLAlchemy = "*"
+SQLAlchemy-Continuum = "*"
+SQLAlchemy-Utils = "*"
+Werkzeug = "*"
+
+
+[dev-packages]
+
+alembic = "*"
+pylint = "*"
+pytest = "*"
+
+
+[requires]
+
+python_version = "3.6.3"

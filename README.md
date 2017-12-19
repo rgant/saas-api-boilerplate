@@ -15,9 +15,11 @@ Exclude some cache files from the project by adding `"folder_exclude_patterns": 
 
 pyenv uses shim scripts to select the correct virtualenv for a file based on it's path. This allows tools like Sublime Text to run pylint and find the correct libraries.
 
+I don't really like `pipenv shell` and how that makes it complicated for SublimeText to figure out what python virtualenv to use. So I won't be allowing `pipenv` to create virtualenvs. Luckily it will use the current one if one is active.
+
 ```
 cd $PROJECT_DIR
-brew install pyenv pyenv-virtualenv
+brew install pyenv pyenv-virtualenv pipenv
 CFLAGS="-I$(brew --prefix openssl)/include" LDFLAGS="-L$(brew --prefix openssl)/lib" pyenv install 3.6.3
 pyenv virtualenv 3.6.3 v$PROJECT_CODE
 pyenv local v$PROJECT_CODE
@@ -26,24 +28,15 @@ pip install --upgrade pip setuptools
 
 Errors like `zipimport.ZipImportError: can't decompress data; zlib not available` can be resolved by installing xcode tools: `xcode-select --install`
 
-### Requirements Files
+### Dependencies
 
-The default `requirements.txt` file created by `pip freeze` is used to install the dependencies for the deployed code.
-
-The `requirements.raw` file tracks and documents the top level dependencies for the project. (Flask, SQLAlchemy, etc.)
-
-After `pip install -r requirements.raw` be sure to `pip freeze > requirements.txt` before installing the development dependencies in `requirements.dev`.
-
-The `requirements.dev` file tracks and documents the development environment dependencies for the project that should not be installed on deploy. (pylint, pytest, etc.)
+Using `pipenv` the project and development dependencies are tracked in `Pipfile` and `Pipfile.lock`. The requirements files for pip have been migrated and moved.
 
 #### Install Requirements
 
-Install the same requirements as used on deploy:
+Install the same requirements as used on deploy: `pipenv install --dev`
 
-```
-pip install -r requirements.txt # deploy dependencies
-pip install -r requirements.dev # dev dependencies
-```
+And then you might need to create the shims for pyenv that you installed: `pyenv rehash`
 
 For PostgreSQL:
 ```

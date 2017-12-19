@@ -1,3 +1,0 @@
-alembic # Manage DB migration scripts
-pylint
-pytest
