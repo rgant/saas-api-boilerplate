@@ -46,6 +46,8 @@ Since the Pipfile loses comments on each `pipenv install` this list documents th
 10. SQLAlchemy # ORM
 11. SQLAlchemy-Continuum # Audit log/versioning
 
+If you add new dependencies, you will need to inform pyenv: `pyenv rehash` will update which packages are installed in the virtualenv.
+
 #### Install Requirements
 
 Install the same requirements as used on deploy: `pipenv install --dev`
