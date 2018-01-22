@@ -52,7 +52,7 @@ If you add new dependencies, you will need to inform pyenv: `pyenv rehash` will 
 
 Install the same requirements as used on deploy: `pipenv install --dev`
 
-And then you might need to create the shims for pyenv that you installed: `pyenv rehash`
+And then you need to create the shims for pyenv that you installed: `pyenv rehash`
 
 For PostgreSQL:
 ```
@@ -69,6 +69,14 @@ brew install mariadb
 echo -e "[mysqld]\ndefault-time-zone='+00:00'" > /usr/local/etc/my.cnf.d/default-time-zone.cnf
 mysql.server start
 mysql -u root -e 'CREATE DATABASE `'$PROJECT'_dev` /*!40100 DEFAULT CHARACTER SET utf8 */'
+```
+
+##### Update Requirements
+
+```
+pipenv update --dry-run --dev # Look for updates allowed by Pipfile, similar to pip list --outdated
+pipenv update --dev # Actually install updates to dependencies
+pyenv rehash # Inform pyenv of modules installed by pipenv
 ```
 
 ## Directory Structure
