@@ -17,6 +17,7 @@ marshmallow-sqlalchemy = "*"
 pymysql = "*"
 sqlalchemy = "*"
 sqlalchemy-continuum = "*"
+mypy = "*"
 
 
 [dev-packages]
