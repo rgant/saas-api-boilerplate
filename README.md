@@ -74,7 +74,7 @@ mysql -u root -e 'CREATE DATABASE `'$PROJECT'_dev` /*!40100 DEFAULT CHARACTER SE
 ##### Update Requirements
 
 ```
-pipenv update --dry-run --dev # Look for updates allowed by Pipfile, similar to pip list --outdated
+pipenv update --outdated --dev # Look for updates allowed by Pipfile
 pipenv update --dev # Actually install updates to dependencies
 pyenv rehash # Inform pyenv of modules installed by pipenv
 ```
