@@ -1,13 +1,22 @@
 {
-	"folders":
-	[
-		{
+    "folders":
+    [
+        {
             "folder_exclude_patterns":
             [
                 ".cache",
                 "__pycache__"
             ],
-			"path": "."
-		}
-	]
+            "path": "."
+        }
+    ],
+    "SublimeLinter":
+    {
+        "linters":
+        {
+            "mypy": {
+                "disable": false
+            }
+        }
+    }
 }
