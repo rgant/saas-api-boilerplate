@@ -5,6 +5,7 @@
             "folder_exclude_patterns":
             [
                 ".cache",
+                ".pytest_cache",
                 "__pycache__"
             ],
             "path": "."
