@@ -1,3 +1,6 @@
 # As of git 2.10 this functions as expected https://github.com/git/git/blob/master/Documentation/RelNotes/2.10.0.txt#L248
 # Automatically detect text files and convert to unix line endings
 * text=auto eol=lf
+
+# Disble diff for minified files
+*.min.* -diff

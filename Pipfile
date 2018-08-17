@@ -1,32 +1,30 @@
 [[source]]
-
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
 
-
 [packages]
-
 bcrypt = "*"
 flask = "*"
 future = "*"
 gunicorn = "*"
 marshmallow-jsonapi = "*"
 marshmallow-sqlalchemy = "*"
+mypy = "*"
 "psycopg2-binary" = "*"
 pymysql = "*"
 sqlalchemy = "*"
 sqlalchemy-continuum = "*"
-mypy = "*"
-
 
 [dev-packages]
-
 alembic = "*"
 pylint = "*"
 pytest = "*"
 
-
 [requires]
+python_version = "3.7"
 
-python_version = "3.6.4"
+[scripts]
+lint = "pylint ./*/"
+mypy = "mypy ./*/"
+test = "py.test"
